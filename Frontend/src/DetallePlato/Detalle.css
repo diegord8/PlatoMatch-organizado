@@ -1,0 +1,471 @@
+/* ---------- Pantalla de detalle de un plato ---------- */
+
+.detalle__subbarra {
+    background: var(--green-900);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.detalle__subbarra-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 14px 32px;
+}
+
+.detalle__volver {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    border: 0;
+    background: none;
+    color: var(--mint);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.detalle__volver:hover {
+    color: #fff;
+}
+
+.detalle__compartir {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.detalle__compartir:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ---------- Contenido principal ---------- */
+
+.detalle__main {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: 30px;
+    align-items: start;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 28px 32px 48px;
+    box-sizing: border-box;
+}
+
+/* ---------- Imagen ---------- */
+
+.detalle__imagen {
+    position: relative;
+    height: 340px;
+    overflow: hidden;
+    border-radius: 24px;
+    box-shadow: 0 12px 30px rgba(20, 60, 40, 0.14);
+}
+
+.detalle__foto {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.detalle__foto--vacia {
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #cfe9da, #e9f5ee);
+    font-size: 76px;
+}
+
+.detalle__costo {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    padding: 11px 16px;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.detalle__costo small {
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.detalle__costo p {
+    margin-top: 2px;
+    font-size: 25px;
+    font-weight: 800;
+    color: var(--green-900);
+}
+
+.detalle__costo span {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+}
+
+.detalle__insignia {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #dc2626;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* ---------- Datos rápidos ---------- */
+
+.detalle__datos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 18px 0 0;
+    padding: 0;
+}
+
+.dato {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    padding: 14px 6px;
+    border-radius: 17px;
+    text-align: center;
+}
+
+.dato dt {
+    margin-top: 5px;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.dato dd {
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.dato small {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.dato--calorias {
+    background: #fff3ea;
+    color: #f97316;
+}
+
+.dato--porciones {
+    background: #e7f4ee;
+    color: var(--green-500);
+}
+
+.dato--tiempo {
+    background: #eaf1fd;
+    color: #3b82f6;
+}
+
+.dato dt {
+    color: var(--ink);
+}
+
+/* ---------- Información del plato ---------- */
+
+.detalle__titulo {
+    font-size: clamp(26px, 2.6vw, 36px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+.detalle__apto {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+    padding: 12px 16px;
+    border: 1px solid #a8e6c4;
+    border-radius: 17px;
+    background: linear-gradient(90deg, #e8faf0, #d8f7e6);
+}
+
+.detalle__apto-icono {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--green-500);
+    color: #fff;
+}
+
+.detalle__apto p {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.detalle__apto small {
+    font-size: 12px;
+    color: #1e9a52;
+}
+
+.detalle__descripcion {
+    margin-top: 20px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--muted);
+}
+
+.detalle__etiquetas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin: 17px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.detalle__etiquetas li {
+    padding: 7px 13px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1f4d37;
+}
+
+.detalle__subtitulo {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-top: 28px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.detalle__subtitulo span {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #dcf3e6;
+    color: var(--green-500);
+}
+
+.detalle__porciones-nota {
+    margin-top: 7px !important;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* ---------- Ingredientes ---------- */
+
+.detalle__ingredientes {
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: #f8fbf9;
+}
+
+.detalle__ingredientes li {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+}
+
+.detalle__ingredientes li:last-child {
+    border-bottom: 0;
+}
+
+.detalle__numero {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #d9f3e4;
+    color: #1e9a52;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.detalle__ingrediente {
+    flex: 1;
+    font-size: 14px;
+}
+
+.detalle__nutriente {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #ffe4e8;
+    color: #e11d48;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* ---------- Aviso ---------- */
+
+.detalle__aviso {
+    display: flex;
+    gap: 13px;
+    margin-top: 22px;
+    padding: 15px 16px;
+    border: 1px solid var(--line);
+    border-radius: 17px;
+    background: #f8fbf9;
+}
+
+.detalle__aviso span {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #eaf1fd;
+    color: #3b82f6;
+}
+
+.detalle__aviso p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--muted);
+}
+
+.detalle__aviso strong {
+    color: var(--ink);
+}
+
+/* ---------- Acciones ---------- */
+
+.detalle__acciones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.detalle__guardar,
+.detalle__opinar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 54px;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-weight: 700;
+    transition: transform 0.1s, box-shadow 0.15s, background 0.15s;
+}
+
+.detalle__guardar:active,
+.detalle__opinar:active {
+    transform: translateY(1px);
+}
+
+.detalle__guardar {
+    border: 0;
+    background: linear-gradient(135deg, #2dbe6c, #25b062);
+    color: #fff;
+    font-size: 15px;
+    box-shadow: 0 8px 20px rgba(45, 190, 108, 0.22);
+}
+
+.detalle__guardar--activo {
+    border: 2px solid var(--green-500);
+    background: #fff;
+    color: var(--green-500);
+    box-shadow: none;
+}
+
+.detalle__opinar {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: #1e9a52;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.detalle__opinar:hover {
+    background: #f1f8f4;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1000px) {
+    .detalle__main {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 22px 24px 40px;
+    }
+
+    .detalle__imagen {
+        height: 320px;
+    }
+
+    .detalle__subbarra-inner {
+        padding: 12px 24px;
+    }
+}
+
+@media (max-width: 560px) {
+    .detalle__main {
+        padding: 18px 16px 32px;
+    }
+
+    .detalle__imagen {
+        height: 250px;
+        border-radius: 20px;
+    }
+
+    .detalle__titulo {
+        font-size: 25px;
+    }
+
+    .detalle__acciones {
+        grid-template-columns: 1fr;
+    }
+
+    .detalle__costo p {
+        font-size: 22px;
+    }
+
+    .detalle__ingredientes li {
+        padding: 12px;
+    }
+
+    .detalle__ingrediente {
+        font-size: 13px;
+    }
+
+    .detalle__subbarra-inner {
+        padding: 12px 16px;
+    }
+}
