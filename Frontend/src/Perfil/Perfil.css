@@ -1,0 +1,665 @@
+.perfil {
+    --perfil-green: #24b96b;
+}
+
+.perfil__portada {
+    position: relative;
+    color: #fff;
+    background: linear-gradient(112deg, #218650 0%, #2abd70 100%);
+}
+
+.perfil__portada-inner {
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 14px 24px 58px;
+}
+
+.perfil__identidad {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 112px;
+}
+
+.perfil__avatar {
+    display: grid;
+    flex: 0 0 96px;
+    place-items: center;
+    width: 96px;
+    height: 96px;
+    border-radius: 18px;
+    background: #fff;
+    color: var(--green-700);
+    font-size: 38px;
+    font-weight: 700;
+}
+
+.perfil__identidad h1 {
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.perfil__identidad p {
+    margin-top: 4px;
+    color: #e5f6ec;
+    font-size: 15px;
+}
+
+.perfil__estado {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    color: #d7f2e2;
+    font-size: 13px;
+}
+
+.perfil__estado i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #62eca0;
+}
+
+.perfil__editar {
+    position: absolute;
+    top: 12px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 17px;
+    border: 0;
+    border-radius: 14px;
+    background: #ffffff2e;
+    color: #fff;
+    font-weight: 700;
+}
+
+.perfil__editar:hover {
+    background: #ffffff45;
+}
+
+.perfil__estadisticas {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 30px;
+}
+
+.perfil__estadisticas div {
+    display: grid;
+    min-height: 64px;
+    align-content: center;
+    gap: 3px;
+    border-radius: 17px;
+    background: #ffffff24;
+    text-align: center;
+}
+
+.perfil__estadisticas dt {
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.perfil__estadisticas dd {
+    color: #e4f6eb;
+    font-size: 11px;
+}
+
+.perfil__contenido {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.65fr);
+    align-items: start;
+    gap: 28px;
+    max-width: 1400px;
+    margin: -24px auto 0;
+    padding: 0 24px 48px;
+}
+
+.perfil__columna {
+    display: grid;
+    gap: 18px;
+}
+
+.perfil__menu,
+.perfil__salud {
+    overflow: hidden;
+    border: 1px solid #e4ece7;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 2px 5px #183f2b12;
+}
+
+.perfil__opcion {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 16px;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 82px;
+    padding: 14px 20px;
+    border: 0;
+    background: #fff;
+    color: inherit;
+    text-align: left;
+}
+
+button.perfil__opcion {
+    cursor: pointer;
+}
+
+button.perfil__opcion:hover {
+    background: #f8fbf9;
+}
+
+.perfil__opcion + .perfil__opcion {
+    border-top: 1px solid #edf1ee;
+}
+
+.perfil__opcion > span:nth-child(2) {
+    display: grid;
+    gap: 3px;
+}
+
+.perfil__opcion strong {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.perfil__opcion small {
+    color: #69766f;
+    font-size: 12px;
+}
+
+.perfil__opcion > svg {
+    color: #bdc8c1;
+    transform: rotate(0deg);
+}
+
+.perfil__opcion-icono {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 15px;
+}
+
+.perfil__opcion-icono--azul { background: #edf4ff; color: #438bfa; }
+.perfil__opcion-icono--amarillo { background: #fff7cf; color: #f0ad21; }
+.perfil__opcion-icono--violeta { background: #f1ebff; color: #9163e8; }
+.perfil__opcion-icono--verde { background: #e7f5ee; color: #34865d; }
+
+.perfil__admin {
+    border-radius: 19px;
+}
+
+.perfil__admin .perfil__opcion {
+    min-height: 76px;
+}
+
+.perfil__salir {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 68px;
+    border: 1px solid #ffcaca;
+    border-radius: 19px;
+    background: #ffe3e3;
+    color: #e63c3c;
+    font-weight: 700;
+}
+
+.perfil__salir:hover {
+    background: #ffd7d7;
+}
+
+.perfil__salud-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 76px;
+    padding: 14px 24px;
+    border-bottom: 1px solid #e8efeb;
+}
+
+.perfil__salud-cabecera h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.perfil__salud-cabecera h2 span {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e8f6ee;
+    color: #2bbc70;
+}
+
+.perfil__salud-cabecera > button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    border: 0;
+    border-radius: 20px;
+    background: #e9f5ef;
+    color: #26714b;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.perfil__salud-cabecera > button:hover {
+    background: #d9efe3;
+}
+
+.perfil__salud-datos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px;
+    padding: 24px;
+}
+
+.perfil__salud-datos h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    color: #697780;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.perfil__salud-datos > div:first-child h3 svg { color: #ff6d70; }
+.perfil__salud-datos > div:last-child h3 svg { color: #35cb82; }
+
+.perfil__salud-datos p {
+    color: #718078;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.perfil__modal-fondo {
+    position: fixed;
+    z-index: 200;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: #10231bb8;
+}
+
+.perfil__modal {
+    width: min(100%, 1080px);
+    max-height: 82vh;
+    padding: 0;
+    border-radius: 20px;
+    background: #f4f6f4;
+    box-shadow: 0 18px 60px #10231b40;
+    overflow: hidden;
+}
+
+.perfil__modal-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 26px 12px;
+    background: #f4f6f4;
+}
+
+.perfil__modal-cabecera h2 {
+    color: #1f2e28;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.perfil__modal-cabecera button {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #405148;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.perfil__formulario {
+    display: grid;
+    gap: 10px;
+    padding: 0 24px 24px;
+}
+
+.perfil__formulario label {
+    margin-top: 6px;
+    color: #33463c;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.perfil__formulario input {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #dce6e0;
+    border-radius: 9px;
+    background: #fff;
+    color: #17251d;
+    font: inherit;
+}
+
+.perfil__formulario input:focus {
+    outline: 2px solid #54c887;
+    outline-offset: 1px;
+}
+
+.perfil__formulario input[readonly] {
+    background: #f3f6f4;
+    color: #65736b;
+}
+
+.perfil__formulario small {
+    color: #6b7871;
+    font-size: 12px;
+}
+
+.perfil__formulario--cuenta {
+    max-width: 540px;
+    max-height: calc(82vh - 70px);
+    margin: 0 auto;
+    padding: 0 24px 24px;
+    overflow-y: auto;
+}
+
+.perfil__ayuda-cuenta {
+    margin-top: -3px;
+    color: #6b7871;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.perfil__separador-cuenta {
+    display: grid;
+    gap: 4px;
+    margin-top: 10px;
+    padding-top: 14px;
+    border-top: 1px solid #dce6e0;
+}
+
+.perfil__separador-cuenta h3 {
+    color: #1f2e28;
+    font-size: 15px;
+}
+
+.perfil__separador-cuenta p {
+    color: #6b7871;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.perfil__error-cuenta {
+    color: #b42323;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.perfil__formulario > button {
+    min-height: 44px;
+    margin-top: 10px;
+    border: 0;
+    border-radius: 9px;
+    background: #23844f;
+    color: #fff;
+    font-weight: 700;
+}
+
+.perfil__formulario--salud {
+    gap: 18px;
+    padding: 0 20px 18px;
+}
+
+.perfil__salud-selector {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 20px;
+    max-height: 60vh;
+    padding: 8px 6px 0;
+    overflow-y: auto;
+    align-items: start;
+}
+
+.perfil__selector-columna {
+    display: grid;
+    grid-auto-rows: max-content;
+    align-content: start;
+    align-self: start;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+}
+
+.perfil__selector-columna h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 4px;
+    color: #1d312c;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.perfil__selector-columna h3::before {
+    content: "";
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    background: #2cc56d;
+    box-shadow: 0 0 0 4px rgba(44, 197, 109, 0.16);
+}
+
+.perfil__input-agregar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2px;
+    width: 100%;
+    min-width: 0;
+}
+
+.perfil__input-agregar input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    height: 42px;
+    padding: 10px 14px;
+    border: 1px solid #dfe6e1;
+    border-radius: 12px;
+    background: #eff3f0;
+    color: #26352e;
+    font-size: 15px;
+}
+
+.perfil__input-agregar input::placeholder {
+    color: #7d8a84;
+}
+
+.perfil__input-agregar button {
+    flex: 0 0 110px;
+    min-width: 110px;
+    height: 42px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #46d282 0%, #29b96c 100%);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 2px 0 rgba(24, 105, 60, 0.18);
+}
+
+.perfil__lista-opciones {
+    display: grid;
+    gap: 10px;
+    padding-bottom: 2px;
+}
+
+.perfil__check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 58px;
+    width: 100%;
+    padding: 0 18px 0 16px;
+    border: 1px solid #dfe7e2;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.8);
+    color: #25332d;
+    font-size: 17px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.perfil__check-item input {
+    width: 20px;
+    min-height: 20px;
+    margin: 0;
+    accent-color: #23b96a;
+}
+
+.perfil__check-item span {
+    display: block;
+    width: 100%;
+    font-weight: 500;
+}
+
+.perfil__acciones {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 20px;
+    padding: 0 8px 8px;
+}
+
+.perfil__acciones--cuenta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+    padding: 0;
+}
+
+.perfil__accion {
+    min-height: 58px;
+    border: 0;
+    border-radius: 14px;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.perfil__accion:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+.perfil__accion--secundario {
+    background: #eef2ef;
+    color: #1d2f29;
+}
+
+.perfil__accion--primario {
+    background: linear-gradient(135deg, #22be6a 0%, #1fa95f 100%);
+    color: #fff;
+}
+
+@media (max-width: 900px) {
+    .perfil__estadisticas {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .perfil__contenido {
+        grid-template-columns: minmax(250px, 0.9fr) minmax(0, 1.2fr);
+        gap: 18px;
+    }
+}
+
+@media (max-width: 700px) {
+    .perfil__portada-inner {
+        padding: 22px 16px 46px;
+    }
+
+    .perfil__identidad {
+        gap: 14px;
+        padding-top: 42px;
+    }
+
+    .perfil__avatar {
+        flex-basis: 72px;
+        width: 72px;
+        height: 72px;
+        border-radius: 15px;
+        font-size: 30px;
+    }
+
+    .perfil__identidad h1 {
+        font-size: 25px;
+        overflow-wrap: anywhere;
+    }
+
+    .perfil__identidad p {
+        font-size: 13px;
+        overflow-wrap: anywhere;
+    }
+
+    .perfil__editar {
+        top: 12px;
+        right: 16px;
+    }
+
+    .perfil__estadisticas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+        margin-top: 22px;
+    }
+
+    .perfil__contenido {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        margin-top: -20px;
+        padding: 0 16px 36px;
+    }
+
+    .perfil__salud-datos {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .perfil__salud-cabecera {
+        padding: 12px 16px;
+    }
+
+    .perfil__salud-cabecera h2 {
+        font-size: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .perfil *,
+    .perfil *::before,
+    .perfil *::after {
+        scroll-behavior: auto !important;
+    }
+}
