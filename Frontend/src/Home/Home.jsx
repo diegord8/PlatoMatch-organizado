@@ -74,9 +74,15 @@ export default function Home({
   const [listaPlatos, setListaPlatos] = useState([])
   const [cargando, setCargando] = useState(true)
 
-  // Estados para la Despensa (Estilo Etiquetas)
-  const [despensa, setDespensa] = useState([])
-  const [nuevoIngrediente, setNuevoIngrediente] = useState('')
+  
+const [despensa, setDespensa] = useState([])
+const [nuevoIngrediente, setNuevoIngrediente] = useState('')
+const [cantidadNueva, setCantidadNueva] = useState('')
+const [unidadNueva, setUnidadNueva] = useState('g')
+const [editando, setEditando] = useState(null)
+const [guardandoDespensa, setGuardandoDespensa] = useState(false)
+const [errorDespensa, setErrorDespensa] = useState('')
+
 
   useEffect(() => {
     if (recetas.length > 0) {
@@ -97,62 +103,161 @@ export default function Home({
     setCargando(false)
   }, [recetas])
 
-  // Cargar ingredientes únicos desde SQL
-  useEffect(() => {
-    if (usuario?.id) {
-      BackendService.obtenerIngredientes(usuario.id)
-        .then(data => {
-          if (Array.isArray(data)) {
-            const unicos = [...new Set(data.map(i => i.trim().toLowerCase()))].filter(Boolean)
-            const presentables = unicos.map(i => i.charAt(0).toUpperCase() + i.slice(1))
-            setDespensa(presentables)
-            localStorage.setItem('platomatch.despensa', presentables.join(', '))
-          }
-        })
-        .catch(() => {})
-    }
-  }, [usuario?.id])
+  
+// Normalizar nombres para evitar duplicados.
+const normalizarNombre = (texto) =>
+  String(texto || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
 
-  // Lógica para agregar ingredientes individuales
-  const agregarIngrediente = async (e) => {
-    if (e) e.preventDefault()
-    const ingText = nuevoIngrediente.trim().toLowerCase()
-    
-    if (!ingText) return
-    
-    const capitalizado = ingText.charAt(0).toUpperCase() + ingText.slice(1)
-    
-    // Evitar que el usuario agregue uno que ya está en la lista visible
-    if (despensa.some(item => item.toLowerCase() === ingText)) {
-        setNuevoIngrediente('')
-        return
-    }
+// Obtener despensa desde SQL Server.
+useEffect(() => {
+  if (!usuario?.id) {
+    setDespensa([])
+    return
+  }
 
-    const nuevaDespensa = [...despensa, capitalizado]
-    setDespensa(nuevaDespensa)
+  let activo = true
+
+  BackendService.obtenerDespensaCantidades(usuario.id)
+    .then((datos) => {
+      if (activo) {
+        setDespensa(Array.isArray(datos) ? datos : [])
+      }
+    })
+    .catch((error) => {
+      if (activo) setErrorDespensa(error.message)
+    })
+
+  return () => {
+    activo = false
+  }
+}, [usuario?.id])
+
+// Guardar en BD antes de actualizar la pantalla.
+const persistirDespensa = async (nueva) => {
+  if (!usuario?.id) {
+    throw new Error('Debes iniciar sesión.')
+  }
+
+  setGuardandoDespensa(true)
+  setErrorDespensa('')
+
+  try {
+    await BackendService.guardarDespensaCantidades(
+      usuario.id,
+      nueva
+    )
+
+    const actualizada =
+      await BackendService.obtenerDespensaCantidades(
+        usuario.id
+      )
+
+    setDespensa(actualizada || [])
+    return true
+  } catch (error) {
+    setErrorDespensa(error.message)
+    return false
+  } finally {
+    setGuardandoDespensa(false)
+  }
+}
+
+// Crear o modificar un ingrediente.
+const agregarIngrediente = async (e) => {
+  e.preventDefault()
+
+  const nombre = nuevoIngrediente.trim()
+  const cantidad = Number(cantidadNueva)
+
+  if (
+    !nombre ||
+    !cantidadNueva ||
+    !Number.isFinite(cantidad) ||
+    cantidad <= 0 ||
+    cantidad > 100000
+  ) {
+    setErrorDespensa(
+      'Indica ingrediente, cantidad y unidad válidos.'
+    )
+    return
+  }
+
+  const duplicado = despensa.some((item) =>
+    normalizarNombre(item.nombreIngrediente) ===
+      normalizarNombre(nombre) &&
+    normalizarNombre(item.nombreIngrediente) !==
+      normalizarNombre(editando)
+  )
+
+  if (duplicado) {
+    setErrorDespensa(
+      'Ese ingrediente ya existe. Usa Editar.'
+    )
+    return
+  }
+
+  const restantes = despensa.filter(
+    (item) =>
+      normalizarNombre(item.nombreIngrediente) !==
+      normalizarNombre(editando)
+  )
+
+  const nueva = [
+    ...restantes,
+    {
+      nombreIngrediente: nombre,
+      cantidad,
+      unidadMedida: unidadNueva,
+    },
+  ]
+
+  const guardado = await persistirDespensa(nueva)
+
+  if (guardado) {
     setNuevoIngrediente('')
-    localStorage.setItem('platomatch.despensa', nuevaDespensa.join(', '))
-
-    // Enviar nueva lista al backend
-    if (usuario?.id) {
-        try {
-            await BackendService.registrarIngredientes(usuario.id, nuevaDespensa)
-        } catch(err) { console.error("Error al guardar:", err) }
-    }
+    setCantidadNueva('')
+    setUnidadNueva('g')
+    setEditando(null)
   }
+}
 
-  // Lógica para quitar ingredientes
-  const quitarIngrediente = async (ingParaBorrar) => {
-    const nuevaDespensa = despensa.filter(i => i !== ingParaBorrar)
-    setDespensa(nuevaDespensa)
-    localStorage.setItem('platomatch.despensa', nuevaDespensa.join(', '))
+// Cargar un ingrediente en el formulario.
+const editarIngrediente = (item) => {
+  setEditando(item.nombreIngrediente)
+  setNuevoIngrediente(item.nombreIngrediente)
+  setCantidadNueva(
+    item.cantidad == null
+      ? ''
+      : String(item.cantidad)
+  )
+  setUnidadNueva(item.unidadMedida || 'g')
+  setErrorDespensa('')
+}
 
-    if (usuario?.id) {
-        try {
-            await BackendService.registrarIngredientes(usuario.id, nuevaDespensa)
-        } catch(err) { console.error("Error al eliminar:", err) }
-    }
+// Quitar un ingrediente.
+const quitarIngrediente = async (nombre) => {
+  const nueva = despensa.filter(
+    (item) =>
+      normalizarNombre(item.nombreIngrediente) !==
+      normalizarNombre(nombre)
+  )
+
+  const guardado = await persistirDespensa(nueva)
+
+  if (
+    guardado &&
+    normalizarNombre(editando) === normalizarNombre(nombre)
+  ) {
+    setEditando(null)
+    setNuevoIngrediente('')
+    setCantidadNueva('')
   }
+}
+
 
   const platosGuardados = listaPlatos.filter((p) => guardados.includes(p.id))
   const porcentaje = presupuestoBase ? 100 : 0
@@ -213,45 +318,213 @@ export default function Home({
                 </span>
               </button>
 
-              {/* HU-05: DESPENSA EN ESTILO ETIQUETAS */}
-              <section className="guardados" style={{ marginTop: '20px' }}>
-                <div className="seccion__cabecera">
-                  <h2>
-                    <Icon name="info" size={18} />
-                    Tu Despensa
-                  </h2>
-                </div>
-                
-                <div style={{ padding: '16px', background: '#fff', borderRadius: '16px', border: '1px solid #eaeaea', marginTop: '12px' }}>
-                  <form onSubmit={agregarIngrediente} style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-                    <input 
-                      type="text" 
-                      placeholder="Ej: Cebolla china..." 
-                      value={nuevoIngrediente}
-                      onChange={(e) => setNuevoIngrediente(e.target.value)}
-                      style={{ flex: 1, padding: '10px 14px', borderRadius: '10px', border: '1px solid #dcdcdc', fontSize: '14px', outline: 'none' }}
-                    />
-                    <button type="submit" disabled={!nuevoIngrediente.trim()} style={{ background: '#16a34a', color: '#fff', border: 'none', borderRadius: '10px', padding: '0 16px', fontWeight: 'bold', cursor: nuevoIngrediente.trim() ? 'pointer' : 'not-allowed', opacity: nuevoIngrediente.trim() ? 1 : 0.6 }}>
-                      +
-                    </button>
-                  </form>
+              
+{/* DESPENSA INTELIGENTE CON CANTIDADES */}
+<section className="guardados" style={{ marginTop: 20 }}>
+  <div className="seccion__cabecera">
+    <h2>
+      <Icon name="info" size={18} />
+      Tu Despensa
+    </h2>
+  </div>
 
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {despensa.length > 0 ? (
-                      despensa.map((ing, idx) => (
-                        <span key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 10px', background: '#f1f5f9', color: '#334155', borderRadius: '8px', fontSize: '13px', fontWeight: '500' }}>
-                          {ing}
-                          <button onClick={() => quitarIngrediente(ing)} style={{ background: 'none', border: 'none', padding: 0, color: '#94a3b8', cursor: 'pointer', display: 'flex' }} aria-label={`Quitar ${ing}`}>
-                             ✕
-                          </button>
-                        </span>
-                      ))
-                    ) : (
-                      <p style={{ margin: 0, fontSize: '14px', color: '#94a3b8', width: '100%', textAlign: 'center' }}>Tu despensa está vacía. ¡Agrega lo que tienes!</p>
-                    )}
-                  </div>
-                </div>
-              </section>
+  <div style={{
+    padding: 16,
+    background: '#fff',
+    borderRadius: 16,
+    border: '1px solid #eaeaea',
+    marginTop: 12,
+  }}>
+    <p style={{
+      color: '#64748b',
+      fontSize: 13,
+    }}>
+      Registra cuánto tienes de cada ingrediente
+      para comprar solamente lo que te falta.
+    </p>
+
+    <form
+      onSubmit={agregarIngrediente}
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginBottom: 16,
+      }}
+    >
+      <input
+        type="text"
+        placeholder="Ej: Arroz"
+        value={nuevoIngrediente}
+        onChange={(e) =>
+          setNuevoIngrediente(e.target.value)
+        }
+        required
+        style={{
+          flex: '2 1 150px',
+          padding: 10,
+          border: '1px solid #cbd5e1',
+          borderRadius: 10,
+          minWidth: 0,
+        }}
+      />
+
+      <input
+        type="number"
+        min="0.001"
+        step="0.001"
+        placeholder="Cantidad"
+        value={cantidadNueva}
+        onChange={(e) =>
+          setCantidadNueva(e.target.value)
+        }
+        required
+        style={{
+          flex: '1 1 80px',
+          width: 90,
+          minWidth: 0,
+          padding: 10,
+          border: '1px solid #cbd5e1',
+          borderRadius: 10,
+        }}
+      />
+
+      <select
+        value={unidadNueva}
+        onChange={(e) =>
+          setUnidadNueva(e.target.value)
+        }
+        style={{
+          flex: '1 1 95px',
+          padding: 10,
+          border: '1px solid #cbd5e1',
+          borderRadius: 10,
+        }}
+      >
+        {[
+          'g', 'kg', 'ml', 'l', 'unidad',
+          'diente', 'taza', 'cucharada',
+          'cucharadita', 'atado',
+        ].map((unidad) => (
+          <option key={unidad} value={unidad}>
+            {unidad}
+          </option>
+        ))}
+      </select>
+
+      <button
+        type="submit"
+        disabled={guardandoDespensa}
+        style={{
+          padding: '10px 16px',
+          background: '#16a34a',
+          color: '#fff',
+          border: 0,
+          borderRadius: 10,
+          fontWeight: 700,
+          cursor: 'pointer',
+        }}
+      >
+        {guardandoDespensa
+          ? 'Guardando...'
+          : editando
+            ? 'Actualizar'
+            : 'Agregar'}
+      </button>
+
+      {editando && (
+        <button
+          type="button"
+          onClick={() => {
+            setEditando(null)
+            setNuevoIngrediente('')
+            setCantidadNueva('')
+            setUnidadNueva('g')
+          }}
+        >
+          Cancelar
+        </button>
+      )}
+    </form>
+
+    {errorDespensa && (
+      <p role="alert" style={{
+        color: '#b91c1c',
+        fontSize: 13,
+      }}>
+        {errorDespensa}
+      </p>
+    )}
+
+    <div style={{
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: 8,
+    }}>
+      {despensa.length === 0 && (
+        <p style={{ color: '#94a3b8' }}>
+          Tu despensa está vacía.
+        </p>
+      )}
+
+      {despensa.map((item) => (
+        <div
+          key={item.nombreIngrediente}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            background: '#f1f5f9',
+            borderRadius: 10,
+            padding: '8px 10px',
+            fontSize: 13,
+            flexWrap: 'wrap',
+          }}
+        >
+          <span>
+            <strong>{item.nombreIngrediente}</strong>
+            {' — '}
+            {item.cantidad == null
+              ? 'Cantidad por definir'
+              : `${item.cantidad} ${item.unidadMedida}`}
+          </span>
+
+          <button
+            type="button"
+            disabled={guardandoDespensa}
+            onClick={() => editarIngrediente(item)}
+            style={{
+              border: 0,
+              background: 'transparent',
+              color: '#047857',
+              cursor: 'pointer',
+            }}
+          >
+            Editar
+          </button>
+
+          <button
+            type="button"
+            disabled={guardandoDespensa}
+            onClick={() =>
+              quitarIngrediente(item.nombreIngrediente)
+            }
+            aria-label={`Quitar ${item.nombreIngrediente}`}
+            style={{
+              border: 0,
+              background: 'transparent',
+              color: '#dc2626',
+              cursor: 'pointer',
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
 
               {/* MERCADOS */}
               <section className="guardados" style={{ marginTop: '20px' }}>

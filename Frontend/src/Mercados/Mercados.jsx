@@ -1,16 +1,249 @@
-import { useEffect, useState } from 'react'
+
+import { useEffect, useMemo, useState } from 'react'
 import Barra from '../Head/Barra.jsx'
 import Icon from '../Head/Icon.jsx'
 import { soles } from '../data/platos.js'
 import { BackendService } from '../services/backendService.js'
 
-// Diccionario local para enriquecer visualmente los mercados que vienen de la BD
 const INFO_EXTRA = {
-  'Mercado Central': { direccion: 'Av. Abancay s/n', horario: 'Lunes a Domingo: 6:00 a.m. - 6:00 p.m.', desc: 'Mercado tradicional con una amplia variedad de productos frescos, abarrotes y precios altamente competitivos para el hogar.' },
-  'Mercado de Surquillo': { direccion: 'Paseo de la República s/n', horario: 'Lunes a Domingo: 7:00 a.m. - 5:00 p.m.', desc: 'Famoso por su gran oferta de ingredientes frescos, carnes de primera y especias.' },
-  'Mercado Santa Anita': { direccion: 'Av. Metropolitana', horario: 'Lunes a Sábado: 4:00 a.m. - 4:00 p.m.', desc: 'Principal centro de abastos mayorista y minorista con los precios más económicos en tubérculos y verduras.' },
-  'Mercado Productores': { direccion: 'Carretera Central Km 2.5', horario: 'Lunes a Domingo: 5:00 a.m. - 3:00 p.m.', desc: 'Ideal para compras al por mayor y despensas mensuales grandes.' },
-  'Mercado San José': { direccion: 'Av. República Dominicana', horario: 'Lunes a Domingo: 7:00 a.m. - 6:00 p.m.', desc: 'Mercado ordenado y limpio, conocido por su excelente sección de pescados y mariscos.' }
+  'Mercado Central': {
+    direccion: 'Av. Abancay s/n',
+    horario: 'Lunes a Domingo: 6:00 a.m. - 6:00 p.m.',
+    desc: 'Mercado tradicional con una amplia variedad de productos frescos, abarrotes y precios competitivos para el hogar.',
+  },
+  'Mercado de Surquillo': {
+    direccion: 'Paseo de la República s/n',
+    horario: 'Lunes a Domingo: 7:00 a.m. - 5:00 p.m.',
+    desc: 'Mercado con una gran oferta de ingredientes frescos, carnes y especias.',
+  },
+  'Mercado Santa Anita': {
+    direccion: 'Av. Metropolitana',
+    horario: 'Lunes a Sábado: 4:00 a.m. - 4:00 p.m.',
+    desc: 'Centro de abastos mayorista y minorista con productos variados.',
+  },
+  'Mercado Productores': {
+    direccion: 'Carretera Central Km 2.5',
+    horario: 'Lunes a Domingo: 5:00 a.m. - 3:00 p.m.',
+    desc: 'Mercado orientado a compras al por mayor y productos para el hogar.',
+  },
+  'Mercado San José': {
+    direccion: 'Av. República Dominicana',
+    horario: 'Lunes a Domingo: 7:00 a.m. - 6:00 p.m.',
+    desc: 'Mercado con secciones de productos frescos, pescados y mariscos.',
+  },
+}
+
+const boton = {
+  border: 'none',
+  borderRadius: 10,
+  padding: '11px 15px',
+  fontWeight: 700,
+  cursor: 'pointer',
+}
+
+const campo = {
+  width: '100%',
+  boxSizing: 'border-box',
+  padding: '11px 12px',
+  border: '1px solid #cbd5e1',
+  borderRadius: 9,
+  background: '#fff',
+}
+
+const celda = {
+  padding: '14px 12px',
+  borderBottom: '1px solid #e2e8f0',
+  verticalAlign: 'middle',
+}
+
+const normalizar = (valor) => {
+  const texto = String(valor ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  const equivalencias = {
+    espinacas: 'espinaca',
+    'espinaca fresca': 'espinaca',
+    limones: 'limon',
+    zanahorias: 'zanahoria',
+    tomates: 'tomate',
+    betarragas: 'betarraga',
+  }
+
+  return equivalencias[texto] || texto
+}
+
+const convertirUnidad = (valor) => {
+  const unidad = normalizar(valor)
+
+  const tabla = {
+    kg: ['peso', 1000],
+    kilogramo: ['peso', 1000],
+    kilogramos: ['peso', 1000],
+    kilo: ['peso', 1000],
+    kilos: ['peso', 1000],
+    g: ['peso', 1],
+    gr: ['peso', 1],
+    gramo: ['peso', 1],
+    gramos: ['peso', 1],
+    l: ['volumen', 1000],
+    litro: ['volumen', 1000],
+    litros: ['volumen', 1000],
+    ml: ['volumen', 1],
+    mililitro: ['volumen', 1],
+    mililitros: ['volumen', 1],
+    unidad: ['unidad', 1],
+    unidades: ['unidad', 1],
+    und: ['unidad', 1],
+    diente: ['diente', 1],
+    dientes: ['diente', 1],
+    taza: ['taza', 1],
+    tazas: ['taza', 1],
+    cucharada: ['cucharada', 1],
+    cucharadas: ['cucharada', 1],
+    atado: ['atado', 1],
+    atados: ['atado', 1],
+  }
+
+  return tabla[unidad] || null
+}
+
+function centimos(valor) {
+  const numero = Number(valor)
+
+  return Number.isFinite(numero)
+    ? Math.round((numero + Number.EPSILON) * 100)
+    : 0
+}
+
+function preciosVigentes(registros) {
+  const ultimos = new Map()
+
+  const ordenados = [...registros].sort((a, b) => {
+    const diferenciaFecha =
+      Date.parse(b.fechaRegistro || 0) -
+      Date.parse(a.fechaRegistro || 0)
+
+    return (
+      Number.isFinite(diferenciaFecha)
+        ? diferenciaFecha
+        : 0
+    ) || Number(b.id || 0) - Number(a.id || 0)
+  })
+
+  for (const precio of ordenados) {
+    const clave = [
+      normalizar(precio.productoNombre),
+      Number(precio.cantidadPrecio),
+      normalizar(precio.unidadPrecio),
+    ].join('|')
+
+    if (!ultimos.has(clave)) {
+      ultimos.set(clave, precio)
+    }
+  }
+
+  return [...ultimos.values()]
+}
+
+function calcularIngrediente(detalle, registros) {
+  const mismoProducto = registros.filter(
+    precio =>
+      normalizar(precio.productoNombre) ===
+      normalizar(detalle.ingrediente)
+  )
+
+  const unidadNecesaria = convertirUnidad(
+    detalle.unidadMedida
+  )
+
+  const cantidadNecesaria = Number(
+    detalle.cantidadNecesaria
+  )
+
+  const opciones = []
+
+  for (const precio of mismoProducto) {
+    const unidadPrecio = convertirUnidad(
+      precio.unidadPrecio
+    )
+
+    const monto = Number(precio.precio)
+
+    const cantidadPresentacion = Number(
+      precio.cantidadPrecio
+    )
+
+    if (
+      !unidadNecesaria ||
+      !unidadPrecio ||
+      unidadNecesaria[0] !== unidadPrecio[0] ||
+      !Number.isFinite(monto) ||
+      monto <= 0 ||
+      !Number.isFinite(cantidadPresentacion) ||
+      cantidadPresentacion <= 0 ||
+      !Number.isFinite(cantidadNecesaria) ||
+      cantidadNecesaria <= 0
+    ) {
+      continue
+    }
+
+    const importe =
+      monto *
+      (cantidadNecesaria * unidadNecesaria[1]) /
+      (cantidadPresentacion * unidadPrecio[1])
+
+    if (Number.isFinite(importe)) {
+      opciones.push(centimos(importe))
+    }
+  }
+
+  if (opciones.length) {
+    const importeCentimos = Math.min(...opciones)
+
+    return {
+      ...detalle,
+      costoIngrediente: importeCentimos / 100,
+      precioDisponible: true,
+      estado: 'disponible',
+      presentacion: null,
+    }
+  }
+
+  const presentacion = mismoProducto[0] || null
+
+  return {
+    ...detalle,
+    costoIngrediente: null,
+    precioDisponible: false,
+    estado: presentacion ? 'unidad' : 'sinprecio',
+    presentacion,
+  }
+}
+
+function sumarCentimos(opcion) {
+  return opcion.detalleIngredientes.reduce(
+    (total, i) =>
+      total +
+      (
+        i.precioDisponible
+          ? centimos(i.costoIngrediente)
+          : 0
+      ),
+    0
+  )
+}
+
+function completo(opcion) {
+  return (
+    opcion.detalleIngredientes.length > 0 &&
+    opcion.detalleIngredientes.every(
+      i => i.precioDisponible
+    )
+  )
 }
 
 export default function Mercados({
@@ -23,260 +256,1023 @@ export default function Mercados({
 }) {
   const [vista, setVista] = useState('lista')
   const [mercadoElegido, setMercadoElegido] = useState(null)
-  const [preciosDetalle, setPreciosDetalle] = useState([])
-  const [cargandoPrecios, setCargandoPrecios] = useState(false)
 
-  const [filtroOrden, setFiltroOrden] = useState('calificacion')
-  const [busquedaMercado, setBusquedaMercado] = useState('')
+  const [busqueda, setBusqueda] = useState('')
+  const [orden, setOrden] = useState('calificacion')
+
+  const [preciosDetalle, setPreciosDetalle] = useState([])
+  const [cargandoDetalle, setCargandoDetalle] =
+    useState(false)
+
+  const [errorDetalle, setErrorDetalle] = useState('')
 
   const [recetaId, setRecetaId] = useState('')
   const [personas, setPersonas] = useState(1)
-  const [comparativaApi, setComparativaApi] = useState(null)
-  const [cargandoComparativa, setCargandoComparativa] = useState(false)
+
+  const [comparativa, setComparativa] = useState(null)
+
+  const [preciosPorMercado, setPreciosPorMercado] =
+    useState({})
+
+  const [erroresMercado, setErroresMercado] =
+    useState({})
+
+  const [cargando, setCargando] = useState(false)
+
+  const [errorComparativa, setErrorComparativa] =
+    useState('')
+
+  const [revision, setRevision] = useState(0)
+
+  const idsMercados = mercados.map(m => m.id).join(',')
 
   useEffect(() => {
-    if (!recetaId && platosReales.length > 0) setRecetaId(String(platosReales[0].id))
+    const existe = platosReales.some(
+      plato => String(plato.id) === String(recetaId)
+    )
+
+    if (!existe) {
+      setRecetaId(
+        platosReales.length
+          ? String(platosReales[0].id)
+          : ''
+      )
+    }
   }, [platosReales, recetaId])
 
   useEffect(() => {
-    if (vista !== 'detalle' || !mercadoElegido?.id) return
-    setCargandoPrecios(true)
-    BackendService.obtenerPreciosPorMercado(mercadoElegido.id)
-      .then((data) => setPreciosDetalle(Array.isArray(data) ? data : []))
-      .catch(() => setPreciosDetalle([]))
-      .finally(() => setCargandoPrecios(false))
-  }, [vista, mercadoElegido])
+    if (
+      vista !== 'detalle' ||
+      !mercadoElegido?.id
+    ) {
+      return undefined
+    }
+
+    let cancelado = false
+
+    setCargandoDetalle(true)
+    setErrorDetalle('')
+
+    BackendService.obtenerPreciosPorMercado(
+      mercadoElegido.id
+    )
+      .then(datos => {
+        if (!cancelado) {
+          setPreciosDetalle(
+            Array.isArray(datos) ? datos : []
+          )
+        }
+      })
+      .catch(err => {
+        if (!cancelado) {
+          setErrorDetalle(err.message)
+          setPreciosDetalle([])
+        }
+      })
+      .finally(() => {
+        if (!cancelado) {
+          setCargandoDetalle(false)
+        }
+      })
+
+    return () => {
+      cancelado = true
+    }
+  }, [vista, mercadoElegido?.id, revision])
 
   useEffect(() => {
-    if (vista !== 'comparacion' || !recetaId) return
-    setCargandoComparativa(true)
-    BackendService.compararMercados(recetaId)
-      .then((data) => setComparativaApi(data))
-      .catch(() => setComparativaApi(null))
-      .finally(() => setCargandoComparativa(false))
-  }, [vista, recetaId])
+    if (
+      vista !== 'comparacion' ||
+      !recetaId
+    ) {
+      return undefined
+    }
+
+    let cancelado = false
+
+    setCargando(true)
+    setErrorComparativa('')
+    setComparativa(null)
+    setPreciosPorMercado({})
+    setErroresMercado({})
+
+    async function cargar() {
+      try {
+        const comparacion =
+          await BackendService.compararMercados(
+            recetaId,
+            personas
+          )
+
+        const resultados = await Promise.allSettled(
+          mercados.map(
+            m => BackendService.obtenerPreciosPorMercado(
+              m.id
+            )
+          )
+        )
+
+        if (cancelado) return
+
+        const precios = {}
+        const errores = {}
+
+        mercados.forEach((mercado, indice) => {
+          const resultado = resultados[indice]
+
+          if (
+            resultado.status === 'fulfilled' &&
+            Array.isArray(resultado.value)
+          ) {
+            precios[String(mercado.id)] =
+              preciosVigentes(resultado.value)
+          } else {
+            errores[String(mercado.id)] =
+              resultado.status === 'rejected'
+                ? resultado.reason?.message ||
+                  'No se pudo consultar'
+                : 'Respuesta inválida del servidor'
+          }
+        })
+
+        setComparativa(comparacion)
+        setPreciosPorMercado(precios)
+        setErroresMercado(errores)
+      } catch (err) {
+        if (!cancelado) {
+          setErrorComparativa(
+            err.message || 'Error de conexión'
+          )
+        }
+      } finally {
+        if (!cancelado) {
+          setCargando(false)
+        }
+      }
+    }
+
+    cargar()
+
+    return () => {
+      cancelado = true
+    }
+  }, [
+    vista,
+    recetaId,
+    personas,
+    idsMercados,
+    revision,
+  ])
+
+  const opciones = useMemo(() => {
+    const resultados =
+      comparativa?.comparativaPorMercado || []
+
+    return resultados.map(opcion => {
+      const registros =
+        preciosPorMercado[String(opcion.mercadoId)]
+
+      const error =
+        erroresMercado[String(opcion.mercadoId)]
+
+      if (!Array.isArray(registros) || error) {
+        return {
+          ...opcion,
+          error: error || 'No hay datos del mercado',
+
+          detalleIngredientes:
+            (opcion.detalleIngredientes || []).map(
+              i => ({
+                ...i,
+                precioDisponible: false,
+                costoIngrediente: null,
+                estado: 'error',
+              })
+            ),
+        }
+      }
+
+      return {
+        ...opcion,
+        error: null,
+
+        detalleIngredientes:
+          (opcion.detalleIngredientes || []).map(
+            i => calcularIngrediente(i, registros)
+          ),
+      }
+    })
+  }, [
+    comparativa,
+    preciosPorMercado,
+    erroresMercado,
+  ])
+
+  const mejorTotal = opciones
+    .filter(o => !o.error && completo(o))
+    .map(sumarCentimos)
+    .reduce(
+      (minimo, valor) =>
+        minimo === null
+          ? valor
+          : Math.min(minimo, valor),
+      null
+    )
+
+  const esMejor = opcion =>
+    !opcion.error &&
+    completo(opcion) &&
+    mejorTotal !== null &&
+    sumarCentimos(opcion) === mejorTotal
+
+  const ingredientes =
+    opciones[0]?.detalleIngredientes || []
 
   const mercadosFiltrados = [...mercados]
-    .filter((m) => m.nombre.toLowerCase().includes(busquedaMercado.trim().toLowerCase()))
+    .filter(m =>
+      normalizar(m.nombre).includes(
+        normalizar(busqueda)
+      )
+    )
     .sort((a, b) => {
-      if (filtroOrden === 'nombre') return a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
-      if (filtroOrden === 'distrito') return (a.distrito || '').localeCompare(b.distrito || '', 'es', { sensitivity: 'base' })
-      const promA = estadisticasMercados[a.nombre]?.promedio ?? 4.5
-      const promB = estadisticasMercados[b.nombre]?.promedio ?? 4.5
-      return promB - promA || a.id - b.id
+      if (orden === 'nombre') {
+        return a.nombre.localeCompare(
+          b.nombre,
+          'es'
+        )
+      }
+
+      if (orden === 'distrito') {
+        return (a.distrito || '').localeCompare(
+          b.distrito || '',
+          'es'
+        )
+      }
+
+      return Number(
+        estadisticasMercados[b.nombre]?.promedio || 0
+      ) - Number(
+        estadisticasMercados[a.nombre]?.promedio || 0
+      )
     })
 
-  // --- PANTALLA 1: LISTA ---
-  if (vista === 'lista') {
-    return (
-      <div className="home">
-        <Barra activa="mercados" onNavegar={onNavegar} />
-        <header style={{ padding: '20px 24px', background: '#fff', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <button type="button" onClick={() => onNavegar('inicio')} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-            <Icon name="back" size={20} />
-          </button>
-          <h1 style={{ fontSize: '20px', margin: 0 }}>Mercados</h1>
-        </header>
+  const calificacion = nombre => {
+    const estadistica =
+      estadisticasMercados[nombre]
 
-        <main style={{ padding: '24px', maxWidth: '850px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-            <input type="text" placeholder="Buscar mercado por nombre..." value={busquedaMercado} onChange={(e) => setBusquedaMercado(e.target.value)} style={{ flex: 1, minWidth: '200px', padding: '10px 14px', borderRadius: '10px', border: '1px solid #dcdcdc' }} />
-            <select value={filtroOrden} onChange={(e) => setFiltroOrden(e.target.value)} style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid #dcdcdc', background: '#fff' }}>
-              <option value="calificacion">Mejor puntuados</option>
-              <option value="nombre">Nombre (A-Z)</option>
-              <option value="distrito">Distrito (A-Z)</option>
-            </select>
-          </div>
+    if (
+      !estadistica?.cantidad ||
+      estadistica.promedio == null
+    ) {
+      return 'Sin calificaciones'
+    }
 
-          <h2 style={{ fontSize: '18px', marginBottom: '4px' }}>Mercados disponibles ({mercadosFiltrados.length})</h2>
-          <p style={{ color: '#666', fontSize: '14px', marginBottom: '20px' }}>Selecciona un mercado para ver sus precios vigentes en SQL Server.</p>
-
-          <div style={{ display: 'grid', gap: '14px' }}>
-            {mercadosFiltrados.map((m) => {
-              const promedio = estadisticasMercados[m.nombre]?.promedio ?? 4.5
-              const valoraciones = estadisticasMercados[m.nombre]?.cantidad ?? 0
-              return (
-                <article key={m.id} onClick={() => { setMercadoElegido(m); setVista('detalle') }} style={{ display: 'flex', background: '#fff', borderRadius: '16px', overflow: 'hidden', border: '1px solid #eaeaea', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                  <div style={{ width: '100px', background: '#e8f6ef', display: 'grid', placeItems: 'center', color: '#278957' }}><Icon name="shoppingBag" size={34} /></div>
-                  <div style={{ padding: '16px', flex: 1 }}>
-                    <h3 style={{ margin: '0 0 6px 0', fontSize: '16px' }}>{m.nombre}</h3>
-                    <p style={{ margin: '0 0 4px 0', fontSize: '13px', color: '#e6a523', fontWeight: 'bold' }}>★ {promedio.toFixed(1)} <span style={{ color: '#888', fontWeight: 'normal' }}>({valoraciones} calificaciones)</span></p>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#666' }}>📍 Distrito: {m.distrito || 'Lima'}</p>
-                  </div>
-                  <div style={{ padding: '20px', display: 'flex', alignItems: 'center', color: '#aaa' }}><Icon name="chevron" size={20} /></div>
-                </article>
-              )
-            })}
-          </div>
-        </main>
-      </div>
-    )
+    return `★ ${Number(
+      estadistica.promedio
+    ).toFixed(1)}`
   }
 
-  // --- PANTALLA 2: DETALLE (TU DISEÑO + DETALLES DEL MOCKUP) ---
-  if (vista === 'detalle' && mercadoElegido) {
-    const promedio = estadisticasMercados[mercadoElegido.nombre]?.promedio ?? 4.5
-    const miCalificacion = calificacionesMercados[mercadoElegido.nombre] ?? 0
-    const infoExtra = INFO_EXTRA[mercadoElegido.nombre] || { direccion: 'Av. Principal s/n', horario: 'Lunes a Domingo', desc: 'Mercado local con variedad de productos frescos.' }
+  const titulo =
+    vista === 'lista'
+      ? 'Mercados'
+      : vista === 'detalle'
+        ? 'Detalle de mercado'
+        : 'Comparación de precios (HU-12)'
 
-    return (
-      <div className="home">
-        <Barra activa="mercados" onNavegar={onNavegar} />
-        <header style={{ padding: '20px 24px', background: '#fff', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <button type="button" onClick={() => setVista('lista')} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><Icon name="back" size={20} /></button>
-          <h1 style={{ fontSize: '20px', margin: 0 }}>Detalle de mercado</h1>
-        </header>
-
-        <main style={{ maxWidth: '850px', margin: '0 auto', paddingBottom: '40px' }}>
-          {/* Tu cabecera original */}
-          <div style={{ height: '140px', background: 'linear-gradient(135deg, #1b5e3a, #278957)', display: 'grid', placeItems: 'center', color: '#fff' }}>
-            <h2 style={{ fontSize: '24px', margin: 0 }}>{mercadoElegido.nombre}</h2>
-          </div>
-
-          <div style={{ padding: '24px', background: '#fff', borderRadius: '0 0 20px 20px', border: '1px solid #eee' }}>
-            
-            {/* Calificación y ubicación */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
-              <div>
-                <h2 style={{ margin: '0 0 6px 0' }}>{mercadoElegido.nombre}</h2>
-                <p style={{ margin: '0 0 6px 0', fontSize: '15px', color: '#e6a523', fontWeight: 'bold' }}>★ {promedio.toFixed(1)} <span style={{ color: '#888', fontWeight: 'normal' }}>({estadisticasMercados[mercadoElegido.nombre]?.cantidad ?? 0} calificaciones)</span></p>
-                <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#555' }}>📍 {infoExtra.direccion}, {mercadoElegido.distrito || 'Lima'}</p>
-                <p style={{ margin: 0, fontSize: '14px', color: '#555' }}>🕒 {infoExtra.horario}</p>
-              </div>
-
-              {onCalificarMercado && (
-                <div>
-                  <span style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '4px' }}>Tu calificación:</span>
-                  {[1, 2, 3, 4, 5].map((estrella) => (
-                    <button key={estrella} type="button" onClick={() => onCalificarMercado(mercadoElegido.nombre, estrella)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: estrella <= miCalificacion ? '#e6a523' : '#ccc' }}>★</button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Nueva sección: Sobre el mercado (del mockup) */}
-            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '15px', margin: '0 0 8px 0', color: '#1e293b' }}>Sobre el mercado</h3>
-              <p style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5, margin: '0 0 16px' }}>{infoExtra.desc}</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', textAlign: 'center' }}>
-                <div><Icon name="shoppingBag" size={20} color="#047857" /><span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginTop: '4px' }}>Variedad</span></div>
-                <div><Icon name="flame" size={20} color="#047857" /><span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginTop: '4px' }}>Accesibles</span></div>
-                <div><Icon name="droplet" size={20} color="#047857" /><span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginTop: '4px' }}>Frescos</span></div>
-                <div><Icon name="shield" size={20} color="#047857" /><span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginTop: '4px' }}>Seguros</span></div>
-              </div>
-            </div>
-
-            {/*lista de precios original  */}
-            <h3 style={{ fontSize: '16px', borderTop: '1px solid #eee', paddingTop: '20px', marginTop: '10px' }}>
-              Precios vigentes registrados en BD
-            </h3>
-
-            {cargandoPrecios ? (
-              <p style={{ color: '#666', fontSize: '14px' }}>Consultando precios...</p>
-            ) : preciosDetalle.length === 0 ? (
-              <p style={{ color: '#777', fontSize: '14px' }}>Aún no hay precios registrados para este mercado en la base de datos.</p>
-            ) : (
-              <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0', display: 'grid', gap: '8px' }}>
-                {preciosDetalle.map((p, idx) => (
-                  <li key={p.id || idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#f5f9f7', borderRadius: '10px', fontSize: '14px' }}>
-                    <span>{p.productoNombre}</span>
-                    <strong style={{ color: '#16a34a' }}>{soles(Number(p.precio))}</strong>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            <button type="button" onClick={() => setVista('comparacion')} style={{ width: '100%', marginTop: '24px', padding: '15px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>
-              Comparar precios de una receta
-            </button>
-          </div>
-        </main>
-      </div>
-    )
+  const volver = () => {
+    if (vista === 'comparacion') {
+      setVista('detalle')
+    } else if (vista === 'detalle') {
+      setVista('lista')
+    } else {
+      onNavegar?.('inicio')
+    }
   }
-
-  // --- PANTALLA 3: MATRIZ COMPARATIVA (SE MANTIENE INTACTA) ---
-  const platoElegido = platosReales.find((p) => String(p.id) === recetaId) || platosReales[0]
-  const opcionesMercado = comparativaApi?.comparativaPorMercado || []
-  const menorCosto = opcionesMercado.length > 0 ? Math.min(...opcionesMercado.map((o) => o.costoTotalProyectado * personas)) : null
-  const ingredientesLista = opcionesMercado[0]?.detalleIngredientes || []
 
   return (
-    <div className="home">
-      <Barra activa="mercados" onNavegar={onNavegar} />
-      <header style={{ padding: '20px 24px', background: '#fff', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <button type="button" onClick={() => setVista('detalle')} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><Icon name="back" size={20} /></button>
-        <h1 style={{ fontSize: '20px', margin: 0 }}>Comparación de precios (HU-12)</h1>
+    <div
+      className="home"
+      style={{
+        minHeight: '100vh',
+        background: '#f5f9f7',
+      }}
+    >
+      <Barra
+        activa="mercados"
+        onNavegar={onNavegar}
+      />
+
+      <header
+        style={{
+          padding: '18px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+          background: '#fff',
+          borderBottom: '1px solid #e2e8f0',
+        }}
+      >
+        <button
+          type="button"
+          onClick={volver}
+          style={{
+            ...boton,
+            background: '#f1f5f9',
+            color: '#0f172a',
+          }}
+        >
+          <Icon name="back" size={20} />
+        </button>
+
+        <h1
+          style={{
+            fontSize: 20,
+            margin: 0,
+            flex: 1,
+          }}
+        >
+          {titulo}
+        </h1>
+
+        {vista !== 'lista' && (
+          <button
+            type="button"
+            onClick={() =>
+              setRevision(v => v + 1)
+            }
+            style={{
+              ...boton,
+              color: '#065f46',
+              background: '#d1fae5',
+            }}
+          >
+            Actualizar precios
+          </button>
+        )}
       </header>
 
-      <main style={{ padding: '24px', maxWidth: '950px', margin: '0 auto' }}>
-        <div style={{ background: '#f5f9f7', padding: '16px', borderRadius: '16px', marginBottom: '20px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '220px' }}>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '6px', fontSize: '13px' }}>Receta a comparar:</label>
-            <select value={recetaId} onChange={(e) => setRecetaId(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc', background: '#fff' }}>
-              {platosReales.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+      {vista === 'lista' && (
+        <main
+          style={{
+            maxWidth: 850,
+            margin: '24px auto',
+            padding: '0 18px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              gap: 12,
+              marginBottom: 20,
+            }}
+          >
+            <input
+              style={{
+                ...campo,
+                flex: 1,
+              }}
+              value={busqueda}
+              onChange={e =>
+                setBusqueda(e.target.value)
+              }
+              placeholder="Buscar mercado"
+            />
+
+            <select
+              style={{
+                ...campo,
+                width: 190,
+              }}
+              value={orden}
+              onChange={e =>
+                setOrden(e.target.value)
+              }
+            >
+              <option value="calificacion">
+                Mejor puntuados
+              </option>
+              <option value="nombre">
+                Nombre (A-Z)
+              </option>
+              <option value="distrito">
+                Distrito (A-Z)
+              </option>
             </select>
           </div>
-          <div>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '6px', fontSize: '13px' }}>Personas:</label>
-            <input type="number" min="1" value={personas} onChange={(e) => setPersonas(Math.max(1, Number(e.target.value)))} style={{ width: '80px', padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }} />
-          </div>
-        </div>
 
-        {cargandoComparativa ? (
-          <p style={{ color: '#666' }}>Calculando comparativa entre mercados...</p>
-        ) : opcionesMercado.length === 0 ? (
-          <p style={{ color: '#666' }}>No hay datos de comparación disponibles para esta receta.</p>
-        ) : (
-          <div style={{ overflowX: 'auto', border: '1px solid #eee', borderRadius: '12px', background: '#fff' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
-              <thead>
-                <tr style={{ background: '#f8f8f8' }}>
-                  <th style={{ padding: '12px', borderBottom: '2px solid #ddd' }}>Ingrediente</th>
-                  {opcionesMercado.map((op) => {
-                    const total = op.costoTotalProyectado * personas
-                    const esMasBarato = total === menorCosto
-                    return (
-                      <th key={op.mercadoId} style={{ padding: '12px', borderBottom: '2px solid #ddd', background: esMasBarato ? '#e8f6ef' : 'transparent' }}>
-                        {op.mercadoNombre}
-                        {esMasBarato && <span style={{ display: 'block', fontSize: '11px', color: '#16a34a' }}>★ Más económico</span>}
-                      </th>
-                    )
-                  })}
-                </tr>
-              </thead>
-              <tbody>
-                {ingredientesLista.map((ing, idx) => (
-                  <tr key={ing.ingrediente || idx} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '12px' }}><strong>{ing.ingrediente}</strong></td>
-                    {opcionesMercado.map((op) => {
-                      const det = op.detalleIngredientes?.[idx]
-                      return (
-                        <td key={op.mercadoId} style={{ padding: '12px', color: '#444' }}>
-                          {det ? soles(Number(det.precioUnitarioReferencial)) : '—'}
-                        </td>
-                      )
-                    })}
-                  </tr>
+          <h2 style={{ fontSize: 18 }}>
+            Mercados disponibles ({mercadosFiltrados.length})
+          </h2>
+
+          {mercadosFiltrados.map(m => (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => {
+                setMercadoElegido(m)
+                setVista('detalle')
+              }}
+              style={{
+                width: '100%',
+                textAlign: 'left',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 15,
+                padding: 20,
+                marginBottom: 12,
+                background: '#fff',
+                border: '1px solid #e2e8f0',
+                borderRadius: 16,
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{ fontSize: 28 }}>
+                🏪
+              </span>
+
+              <span style={{ flex: 1 }}>
+                <strong
+                  style={{
+                    display: 'block',
+                    fontSize: 17,
+                  }}
+                >
+                  {m.nombre}
+                </strong>
+
+                <span
+                  style={{
+                    display: 'block',
+                    color: '#b7791f',
+                    marginTop: 5,
+                  }}
+                >
+                  {calificacion(m.nombre)}
+                  {' '}(
+                  {estadisticasMercados[m.nombre]
+                    ?.cantidad || 0}
+                  {' '}calificaciones)
+                </span>
+
+                <small style={{ color: '#64748b' }}>
+                  {m.distrito || 'Distrito no indicado'}
+                </small>
+              </span>
+
+              <Icon name="chevron" size={20} />
+            </button>
+          ))}
+        </main>
+      )}
+
+      {vista === 'detalle' && mercadoElegido && (
+        <main
+          style={{
+            maxWidth: 850,
+            margin: '24px auto',
+            padding: '0 18px',
+          }}
+        >
+          <section
+            style={{
+              background: '#fff',
+              borderRadius: 18,
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                background: '#176f4b',
+                padding: 24,
+                textAlign: 'center',
+                color: '#fff',
+              }}
+            >
+              <h2 style={{ margin: 0 }}>
+                {mercadoElegido.nombre}
+              </h2>
+            </div>
+
+            <div style={{ padding: 24 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 15,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div>
+                  <h2>{mercadoElegido.nombre}</h2>
+
+                  <p style={{ color: '#b7791f' }}>
+                    {calificacion(mercadoElegido.nombre)}
+                    {' '}(
+                    {estadisticasMercados[
+                      mercadoElegido.nombre
+                    ]?.cantidad || 0}
+                    {' '}calificaciones)
+                  </p>
+
+                  <p>
+                    📍{' '}
+                    {INFO_EXTRA[mercadoElegido.nombre]
+                      ?.direccion ||
+                      'Dirección no disponible'}
+                    ,{' '}
+                    {mercadoElegido.distrito || 'Lima'}
+                  </p>
+
+                  <p>
+                    🕒{' '}
+                    {INFO_EXTRA[mercadoElegido.nombre]
+                      ?.horario ||
+                      'Horario no disponible'}
+                  </p>
+                </div>
+
+                {onCalificarMercado && (
+                  <div>
+                    <small>
+                      Tu calificación:
+                    </small>
+
+                    <div>
+                      {[1, 2, 3, 4, 5].map(estrella => (
+                        <button
+                          key={estrella}
+                          type="button"
+                          style={{
+                            background: 'transparent',
+                            border: 0,
+                            fontSize: 25,
+                            color:
+                              estrella <= (
+                                calificacionesMercados[
+                                  mercadoElegido.nombre
+                                ] || 0
+                              )
+                                ? '#e6a523'
+                                : '#cbd5e1',
+                            cursor: 'pointer',
+                          }}
+                          onClick={() =>
+                            onCalificarMercado(
+                              mercadoElegido.nombre,
+                              estrella
+                            )
+                          }
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div
+                style={{
+                  background: '#f8fafc',
+                  borderRadius: 12,
+                  padding: 16,
+                  margin: '20px 0',
+                }}
+              >
+                <h3>Sobre el mercado</h3>
+
+                <p>
+                  {INFO_EXTRA[mercadoElegido.nombre]
+                    ?.desc ||
+                    'Mercado registrado en PlatoMatch.'}
+                </p>
+
+                <p>
+                  🛍️ Variedad　♨️ Accesibles　💧 Frescos　🛡️ Seguros
+                </p>
+              </div>
+
+              <h3>
+                Precios registrados en SQL Server
+              </h3>
+
+              {cargandoDetalle ? (
+                <p>Consultando precios...</p>
+              ) : errorDetalle ? (
+                <p
+                  role="alert"
+                  style={{ color: '#b91c1c' }}
+                >
+                  {errorDetalle}
+                </p>
+              ) : preciosDetalle.length === 0 ? (
+                <p>No hay precios registrados.</p>
+              ) : (
+                <ul
+                  style={{
+                    listStyle: 'none',
+                    padding: 0,
+                    display: 'grid',
+                    gap: 9,
+                  }}
+                >
+                  {preciosDetalle.map((p, i) => (
+                    <li
+                      key={p.id || i}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 12,
+                        background: '#f5f9f7',
+                        borderRadius: 10,
+                        padding: '12px 14px',
+                      }}
+                    >
+                      <span>
+                        <strong>
+                          {p.productoNombre}
+                        </strong>
+
+                        <small
+                          style={{
+                            display: 'block',
+                            color: '#64748b',
+                          }}
+                        >
+                          {p.cantidadPrecio}
+                          {' '}
+                          {p.unidadPrecio}
+                        </small>
+                      </span>
+
+                      <strong
+                        style={{ color: '#059669' }}
+                      >
+                        {soles(Number(p.precio))}
+                      </strong>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <button
+                type="button"
+                onClick={() =>
+                  setVista('comparacion')
+                }
+                style={{
+                  ...boton,
+                  width: '100%',
+                  background: '#059669',
+                  color: '#fff',
+                  marginTop: 18,
+                }}
+              >
+                Comparar precios de una receta
+              </button>
+            </div>
+          </section>
+        </main>
+      )}
+
+      {vista === 'comparacion' && (
+        <main
+          style={{
+            maxWidth: 1120,
+            margin: '25px auto',
+            padding: '0 18px',
+          }}
+        >
+          <section
+            style={{
+              display: 'flex',
+              gap: 16,
+              alignItems: 'end',
+              flexWrap: 'wrap',
+              background: '#f8fafc',
+              padding: 17,
+              borderRadius: 14,
+              marginBottom: 22,
+            }}
+          >
+            <label
+              style={{
+                flex: 1,
+                minWidth: 240,
+                fontWeight: 700,
+              }}
+            >
+              Receta a comparar:
+
+              <select
+                value={recetaId}
+                onChange={e =>
+                  setRecetaId(e.target.value)
+                }
+                style={{
+                  ...campo,
+                  display: 'block',
+                  marginTop: 7,
+                }}
+              >
+                {platosReales.map(plato => (
+                  <option
+                    value={String(plato.id)}
+                    key={plato.id}
+                  >
+                    {plato.nombre}
+                  </option>
                 ))}
-              </tbody>
-              <tfoot>
-                <tr style={{ background: '#f0faf4' }}>
-                  <td style={{ padding: '14px', fontWeight: 'bold' }}>Total estimado ({personas} pers.)</td>
-                  {opcionesMercado.map((op) => {
-                    const total = op.costoTotalProyectado * personas
-                    return (
-                      <td key={op.mercadoId} style={{ padding: '14px', fontWeight: 'bold', color: total === menorCosto ? '#16a34a' : '#333' }}>
-                        {soles(total)}
-                      </td>
+              </select>
+            </label>
+
+            <label
+              style={{
+                width: 115,
+                fontWeight: 700,
+              }}
+            >
+              Personas:
+
+              <input
+                type="number"
+                min="1"
+                max="30"
+                step="1"
+                value={personas}
+                onChange={e =>
+                  setPersonas(
+                    Math.min(
+                      30,
+                      Math.max(
+                        1,
+                        Math.trunc(
+                          Number(e.target.value) || 1
+                        )
+                      )
                     )
-                  })}
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        )}
-      </main>
+                  )
+                }
+                style={{
+                  ...campo,
+                  display: 'block',
+                  marginTop: 7,
+                }}
+              />
+            </label>
+          </section>
+
+          {cargando ? (
+            <p>
+              Consultando precios de SQL Server...
+            </p>
+          ) : errorComparativa ? (
+            <p
+              role="alert"
+              style={{ color: '#b91c1c' }}
+            >
+              {errorComparativa}
+            </p>
+          ) : opciones.length === 0 ? (
+            <p>
+              No hay datos para comparar esta receta.
+            </p>
+          ) : (
+            <>
+              <div
+                style={{
+                  overflowX: 'auto',
+                  background: '#fff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 14,
+                }}
+              >
+                <table
+                  style={{
+                    borderCollapse: 'collapse',
+                    width: '100%',
+                    minWidth: 900,
+                    textAlign: 'left',
+                  }}
+                >
+                  <thead>
+                    <tr
+                      style={{
+                        background: '#f8fafc',
+                      }}
+                    >
+                      <th
+                        style={{
+                          ...celda,
+                          minWidth: 170,
+                        }}
+                      >
+                        Ingrediente
+                      </th>
+
+                      {opciones.map(op => (
+                        <th
+                          key={op.mercadoId}
+                          style={{
+                            ...celda,
+                            minWidth: 145,
+                            background: esMejor(op)
+                              ? '#dcfce7'
+                              : '#f8fafc',
+                          }}
+                        >
+                          {op.mercadoNombre}
+
+                          {esMejor(op) && (
+                            <small
+                              style={{
+                                display: 'block',
+                                color: '#15803d',
+                              }}
+                            >
+                              ★ Más económico
+                            </small>
+                          )}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {ingredientes.map(
+                      (ingrediente, indice) => (
+                        <tr
+                          key={
+                            `${ingrediente.ingrediente}-${indice}`
+                          }
+                        >
+                          <td style={celda}>
+                            <strong>
+                              {ingrediente.ingrediente}
+                            </strong>
+
+                            <small
+                              style={{
+                                display: 'block',
+                                color: '#64748b',
+                                marginTop: 5,
+                              }}
+                            >
+                              {ingrediente.cantidadNecesaria}
+                              {' '}
+                              {ingrediente.unidadMedida}
+                            </small>
+                          </td>
+
+                          {opciones.map(op => {
+                            const dato =
+                              op.detalleIngredientes[indice]
+
+                            const tiene =
+                              dato?.precioDisponible
+
+                            return (
+                              <td
+                                key={op.mercadoId}
+                                style={celda}
+                              >
+                                {tiene ? (
+                                  <strong
+                                    style={{
+                                      fontWeight: 500,
+                                    }}
+                                  >
+                                    {soles(
+                                      Number(
+                                        dato.costoIngrediente
+                                      )
+                                    )}
+                                  </strong>
+                                ) : (
+                                  <span
+                                    style={{
+                                      color: '#b45309',
+                                      fontSize: 13,
+                                    }}
+                                  >
+                                    {dato?.estado === 'unidad'
+                                      ? 'Unidad incompatible'
+                                      : dato?.estado === 'error'
+                                        ? 'Error de consulta'
+                                        : 'Sin precio'}
+
+                                    {dato?.estado === 'unidad' &&
+                                      dato.presentacion && (
+                                      <small
+                                        style={{
+                                          display: 'block',
+                                          marginTop: 5,
+                                          color: '#64748b',
+                                        }}
+                                      >
+                                        Registrado:{' '}
+                                        {soles(
+                                          Number(
+                                            dato.presentacion.precio
+                                          )
+                                        )}
+                                        {' '}por{' '}
+                                        {dato.presentacion.cantidadPrecio}
+                                        {' '}
+                                        {dato.presentacion.unidadPrecio}
+                                      </small>
+                                    )}
+                                  </span>
+                                )}
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+
+                  <tfoot>
+                    <tr
+                      style={{
+                        background: '#ecfdf5',
+                      }}
+                    >
+                      <td
+                        style={{
+                          ...celda,
+                          fontWeight: 700,
+                        }}
+                      >
+                        Total estimado ({personas} pers.)
+                      </td>
+
+                      {opciones.map(op => {
+                        const disponibles =
+                          op.detalleIngredientes.filter(
+                            i => i.precioDisponible
+                          ).length
+
+                        return (
+                          <td
+                            style={{
+                              ...celda,
+                              fontWeight: 700,
+                            }}
+                            key={op.mercadoId}
+                          >
+                            {disponibles === 0
+                              ? 'Sin total'
+                              : soles(
+                                  sumarCentimos(op) / 100
+                                )}
+
+                            <small
+                              style={{
+                                display: 'block',
+                                fontWeight: 400,
+                                marginTop: 5,
+                                color: completo(op)
+                                  ? '#15803d'
+                                  : '#b45309',
+                              }}
+                            >
+                              {op.error
+                                ? 'Error al consultar este mercado'
+                                : completo(op)
+                                  ? 'Total completo'
+                                  : `Subtotal parcial (${disponibles}/${op.detalleIngredientes.length})`}
+                            </small>
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              {opciones.some(
+                op => !completo(op)
+              ) && (
+                <p
+                  style={{
+                    padding: 15,
+                    borderRadius: 10,
+                    background: '#fef3c7',
+                    color: '#92400e',
+                    marginTop: 18,
+                  }}
+                >
+                  Los ingredientes sin precio compatible
+                  no se suman. Un subtotal parcial no
+                  permite comparar cuál mercado tiene
+                  el menor costo total.
+                </p>
+              )}
+            </>
+          )}
+        </main>
+      )}
     </div>
   )
 }
