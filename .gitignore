@@ -1,0 +1,11 @@
+## .NET Core
+bin/
+obj/
+*.user
+.vs/
+.vscode/
+
+## Node / React
+node_modules/
+dist/
+.env
