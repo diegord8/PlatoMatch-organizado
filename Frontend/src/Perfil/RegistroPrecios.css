@@ -1,0 +1,424 @@
+.registro-precios {
+    --registro-verde: #1a5c3e;
+    --registro-brillante: #2bc873;
+    --registro-tinta: #17251f;
+    --registro-muted: #78867f;
+    --registro-linea: #e5eee9;
+    background: #f3f8f5;
+    color: var(--registro-tinta);
+}
+
+.registro-precios__barra {
+    position: relative;
+    z-index: 1;
+    background: var(--registro-verde);
+    color: #fff;
+}
+
+.registro-precios__barra-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 1400px;
+    min-height: 72px;
+    margin: 0 auto;
+    padding: 0 48px;
+}
+
+.registro-precios__barra-inner button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 0;
+    border: 0;
+    background: transparent;
+    color: #a9dcc1;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.registro-precios__barra-inner button:hover {
+    color: #fff;
+}
+
+.registro-precios__barra-inner > span {
+    width: 1px;
+    height: 22px;
+    background: #ffffff38;
+}
+
+.registro-precios__barra-inner > svg {
+    color: var(--registro-brillante);
+}
+
+.registro-precios__barra-inner strong {
+    font-size: 16px;
+}
+
+.registro-precios__portada {
+    min-height: 142px;
+    background: var(--registro-verde);
+    color: #fff;
+}
+
+.registro-precios__portada-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 22px 48px 48px;
+}
+
+.registro-precios__portada h1 {
+    font-size: clamp(25px, 3vw, 33px);
+    font-weight: 800;
+}
+
+.registro-precios__portada p {
+    margin-top: 4px !important;
+    color: #b8e2ca;
+    font-size: 14px;
+}
+
+.registro-precios__contenido {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+    align-items: stretch;
+    gap: 24px;
+    max-width: 1400px;
+    margin: -26px auto 0;
+    padding: 0 48px 48px;
+}
+
+.registro-precios__tarjeta {
+    overflow: hidden;
+    border: 1px solid var(--registro-linea);
+    border-radius: 26px;
+    background: #fff;
+    box-shadow: 0 2px 4px #123a2510;
+}
+
+.registro-precios__tarjeta-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 76px;
+    padding: 14px 22px;
+    border-bottom: 1px solid #edf2ef;
+}
+
+.registro-precios__tarjeta-cabecera h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.registro-precios__tarjeta-cabecera h2 > span {
+    display: grid;
+    flex: 0 0 36px;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e8f6ee;
+    color: #28bd70;
+}
+
+.registro-precios__tarjeta-cabecera h2 > .registro-precios__icono-agregar {
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.registro-precios__tarjeta-cabecera h2 > .registro-precios__icono-amarillo {
+    background: #fff6c9;
+    color: #d5a00f;
+}
+
+.registro-precios__contador {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #f2f7f4;
+    color: #65736b;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.registro-precios__formulario {
+    display: grid;
+    gap: 10px;
+    padding: 22px;
+}
+
+.registro-precios__formulario > label,
+.registro-precios__campos label {
+    color: var(--registro-tinta);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.registro-precios__formulario label b {
+    color: #ed4c4c;
+}
+
+.registro-precios__formulario input,
+.registro-precios__formulario select {
+    width: 100%;
+    min-width: 0;
+    min-height: 52px;
+    padding: 0 16px;
+    border: 2px solid #dfede5;
+    border-radius: 17px;
+    outline: 0;
+    background: #f5f9f7;
+    color: var(--registro-tinta);
+    font: inherit;
+    font-size: 13px;
+}
+
+.registro-precios__formulario input:focus,
+.registro-precios__formulario select:focus {
+    border-color: #42c77e;
+}
+
+.registro-precios__formulario input::placeholder {
+    color: #9aa69f;
+}
+
+.registro-precios__campos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin: 8px 0;
+}
+
+.registro-precios__campos > div {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.registro-precios__presentacion {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 90px;
+    gap: 6px;
+}
+
+.registro-precios__presentacion select {
+    padding: 0 8px;
+}
+
+.registro-precios__ayuda-presentacion {
+    margin-top: -3px;
+    color: var(--registro-muted);
+    font-size: 11px;
+}
+
+.registro-precios__precio-input {
+    position: relative;
+}
+
+.registro-precios__precio-input > span {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    padding: 5px 8px;
+    border-radius: 8px;
+    background: #e8f6ee;
+    color: #26714b;
+    font-size: 12px;
+    font-weight: 700;
+    transform: translateY(-50%);
+}
+
+.registro-precios__precio-input input {
+    padding-left: 62px;
+}
+
+.registro-precios__registrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 61px;
+    margin-top: 7px;
+    border: 0;
+    border-radius: 17px;
+    background: linear-gradient(110deg, #2dcc76, #25b969);
+    box-shadow: 0 5px 10px #27b96a30;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.registro-precios__registrar:hover {
+    background: #21ad60;
+}
+
+.registro-precios__registrar > span {
+    font-size: 23px;
+    font-weight: 400;
+    line-height: 1;
+}
+
+.registro-precios__mensaje {
+    color: #26714b;
+    font-size: 12px;
+}
+
+.registro-precios__tabla-contenedor {
+    overflow-x: auto;
+}
+
+.registro-precios__tabla {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.registro-precios__tabla th,
+.registro-precios__tabla td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #edf2ef;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.registro-precios__tabla th {
+    background: #f5f9f7;
+    color: #74827b;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.registro-precios__tabla td {
+    color: #718078;
+}
+
+.registro-precios__tabla td:first-child {
+    color: var(--registro-tinta);
+    font-weight: 600;
+}
+
+.registro-precios__tabla td.registro-precios__valor {
+    color: #176c40;
+    font-weight: 700;
+}
+
+.registro-precios__tabla td.registro-precios__mercado {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.registro-precios__editar-presentacion {
+    display: grid;
+    grid-template-columns: 76px 86px auto;
+    gap: 5px;
+    align-items: center;
+}
+
+.registro-precios__editar-presentacion input,
+.registro-precios__editar-presentacion select {
+    min-height: 34px;
+    max-width: 90px;
+    padding: 0 7px;
+    border: 1px solid #dfede5;
+    border-radius: 8px;
+    background: #f5f9f7;
+    color: var(--registro-tinta);
+    font: inherit;
+}
+
+.registro-precios__editar-presentacion button,
+.registro-precios__editar-boton {
+    border: 0;
+    background: transparent;
+    color: #176c40;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.registro-precios__editar-boton {
+    display: block;
+    margin-top: 5px;
+    padding: 0;
+    font-size: 10px;
+}
+
+.registro-precios__nota-unidad {
+    display: block;
+    max-width: 190px;
+    margin-top: 4px;
+    color: var(--registro-muted);
+    font-size: 10px;
+    white-space: normal;
+}
+
+.registro-precios__tendencia {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.registro-precios__tendencia--sube { color: #ef4444; }
+.registro-precios__tendencia--baja,
+.registro-precios__tendencia--nuevo { color: #22b86a; }
+.registro-precios__tendencia--igual { color: #64748b; }
+
+@media (max-width: 900px) {
+    .registro-precios__barra-inner,
+    .registro-precios__portada-inner {
+        padding-right: 24px;
+        padding-left: 24px;
+    }
+
+    .registro-precios__contenido {
+        grid-template-columns: 1fr;
+        padding-right: 24px;
+        padding-left: 24px;
+    }
+}
+
+@media (max-width: 600px) {
+    .registro-precios__barra-inner {
+        min-height: 60px;
+        padding: 0 16px;
+    }
+
+    .registro-precios__barra-inner strong {
+        font-size: 13px;
+    }
+
+    .registro-precios__portada-inner {
+        padding: 22px 16px 44px;
+    }
+
+    .registro-precios__contenido {
+        gap: 14px;
+        padding: 0 12px 30px;
+    }
+
+    .registro-precios__tarjeta {
+        border-radius: 20px;
+    }
+
+    .registro-precios__tarjeta-cabecera {
+        min-height: 66px;
+        padding: 12px 14px;
+    }
+
+    .registro-precios__formulario {
+        padding: 16px;
+    }
+
+    .registro-precios__campos {
+        grid-template-columns: 1fr;
+    }
+
+    .registro-precios__tabla th,
+    .registro-precios__tabla td {
+        padding: 12px;
+    }
+}
