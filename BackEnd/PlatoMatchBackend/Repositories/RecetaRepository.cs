@@ -32,64 +32,7 @@ namespace PlatoMatchBackend.Repositories
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        // ========================================
-        // HU-09: RECUPERAR PRECIOS DE SQL SERVER
-        // ========================================
-
-        // Consultar precios válidos de un mercado.
-        public async Task<List<PrecioMercado>>
-            ObtenerPreciosPorMercadoAsync(int mercadoId)
-        {
-            if (mercadoId <= 0)
-            {
-                return new List<PrecioMercado>();
-            }
-
-            return await _context.PreciosMercado
-                .AsNoTracking()
-                .Where(p =>
-                    p.MercadoId == mercadoId &&
-                    p.Precio > 0 &&
-                    p.CantidadPrecio > 0)
-                .OrderBy(p => p.ProductoNombre)
-                .ThenByDescending(p => p.FechaRegistro)
-                .ToListAsync();
-        }
-
-        // Buscar precios de un producto en los mercados.
-        public async Task<List<PrecioMercado>>
-            BuscarPreciosPorProductoAsync(string producto)
-        {
-            if (string.IsNullOrWhiteSpace(producto))
-            {
-                return new List<PrecioMercado>();
-            }
-
-            string nombre = producto.Trim();
-
-            return await _context.PreciosMercado
-                .AsNoTracking()
-                .Where(p =>
-                    p.ProductoNombre.Contains(nombre) &&
-                    p.Precio > 0 &&
-                    p.CantidadPrecio > 0)
-                .OrderBy(p => p.Precio)
-                .ToListAsync();
-        }
-
-        // Obtener todos los precios válidos.
-        // Utilizado también por las listas de compras.
-        public async Task<List<PrecioMercado>>
-            ObtenerTodosLosPreciosAsync()
-        {
-            return await _context.PreciosMercado
-                .AsNoTracking()
-                .Where(p =>
-                    p.Precio > 0 &&
-                    p.CantidadPrecio > 0)
-                .OrderBy(p => p.ProductoNombre)
-                .ToListAsync();
-        }
+        
 
         // ========================================
         // PLATOS FAVORITOS
@@ -156,23 +99,6 @@ namespace PlatoMatchBackend.Repositories
             return true;
         }
 
-        // ========================================
-        // INGREDIENTES DE RECETAS
-        // ========================================
-
-        public async Task<List<RecetaIngrediente>>
-            ObtenerIngredientesPorRecetaAsync(int recetaId)
-        {
-            return await _context.RecetaIngredientes
-                .AsNoTracking()
-                .Where(i => i.RecetaId == recetaId)
-                .ToListAsync();
-        }
-
-        // ========================================
-        // HU-11: MERCADOS DISPONIBLES
-        // ========================================
-
         public async Task<List<Mercado>>
             ObtenerMercadosAsync()
         {
@@ -182,49 +108,6 @@ namespace PlatoMatchBackend.Repositories
                 .ToListAsync();
         }
 
-        // ========================================
-        // HU-12: PRECIOS PARA COMPARACIÓN
-        // ========================================
-
-        public async Task<List<PrecioMercado>>
-            ObtenerPreciosValidosPorMercadoAsync(
-                int mercadoId)
-        {
-            return await ObtenerPreciosPorMercadoAsync(
-                mercadoId);
-        }
-
-        // ========================================
-        // HU-13: REGISTRO DE FEEDBACK
-        // ========================================
-
-        public async Task<bool> RegistrarFeedbackAsync(
-            Feedback feedback)
-        {
-            await _context.Feedbacks
-                .AddAsync(feedback);
-
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
-
-        // ========================================
-        // HU-14: CONSULTA DE FEEDBACKS
-        // ========================================
-
-        public async Task<List<Feedback>>
-            ObtenerFeedbacksValidosPorRecetaAsync(
-                int recetaId)
-        {
-            return await _context.Feedbacks
-                .AsNoTracking()
-                .Where(f =>
-                    f.RecetaId == recetaId &&
-                    f.Puntuacion >= 1 &&
-                    f.Puntuacion <= 5)
-                .OrderByDescending(f => f.FechaRegistro)
-                .ToListAsync();
-        }
+        
     }
 }

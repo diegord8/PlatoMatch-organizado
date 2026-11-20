@@ -17,12 +17,23 @@ namespace PlatoMatchBackend.Models
     public class PrecioMercado
     {
         [Key]
-        public int Id {get; set;}
+        public int Id { get; set; }
+
         [Required]
-        public string ProductoNombre {get; set;} = string.Empty;
+        public string ProductoNombre { get; set; } = string.Empty;
+
         [Column(TypeName = "decimal(10,2)")]
-        public decimal Precio {get; set;}
-        public int MercadoId {get; set;}
-        public DateTime FechaRegistro {get; set;} = DateTime.UtcNow;
+        public decimal Precio { get; set; }
+
+        public int MercadoId { get; set; }
+
+        [Column(TypeName = "decimal(10,3)")]
+        public decimal CantidadPrecio { get; set; } = 1m;
+
+        [MaxLength(20)]
+        public string UnidadPrecio { get; set; } = "unidad";
+
+        public DateTime FechaRegistro { get; set; }
+            = DateTime.UtcNow;
     }
 }
