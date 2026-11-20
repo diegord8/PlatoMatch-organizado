@@ -1,112 +1,257 @@
+
 import { useEffect, useState } from 'react'
-import Icon from '../Head/Icon.jsx'
 import { BackendService } from '../services/backendService.js'
 import { soles } from '../data/platos.js'
 
-export default function ResumenAhorro({ usuarioId, historial = [], onVolver }) {
-  const [resumenApi, setResumenApi] = useState(null)
+export default function ResumenAhorro({
+  usuarioId,
+  onVolver,
+  onCompras,
+}) {
+  const [resumen, setResumen] = useState(null)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    const id = usuarioId || JSON.parse(localStorage.getItem('platomatch.sesion') || '{}')?.usuario?.id
-    if (!id) return
-    BackendService.obtenerResumenAhorro(id)
-      .then((data) => setResumenApi(data))
-      .catch(() => {})
+    if (!usuarioId) return
+
+    let activo = true
+
+    BackendService.obtenerResumenAhorro(usuarioId)
+      .then(datos => {
+        if (activo) setResumen(datos)
+      })
+      .catch(e => {
+        if (activo) setError(e.message)
+      })
+
+    return () => { activo = false }
   }, [usuarioId])
 
-  const presupuesto = resumenApi?.presupuestoAsignado ?? 50
-  const preparaciones = resumenApi?.detalle ?? historial
-  
-  // Cálculo matemático lógico:
-  const gastado = resumenApi?.totalGastoEjecutado ?? preparaciones.reduce((acc, p) => acc + (Number(p.gastoReal) || 0), 0)
-  // El ahorro total es lo que te sobró de tu presupuesto. Si gastaste más, es 0.
-  const ahorroCalculado = Math.max(0, presupuesto - gastado)
-  const ahorroTotal = resumenApi?.ahorroAcumulado ?? ahorroCalculado
+  const preparaciones = resumen?.detalle || []
+  const meses = resumen?.ahorrosMensuales || []
 
-  const porcentajeGasto = presupuesto > 0 ? Math.min(100, Math.round((gastado / presupuesto) * 100)) : 0
+  const presupuesto = Number(
+    resumen?.presupuestoAsignado || 0
+  )
+
+  const gasto = Number(
+    resumen?.totalGastoEjecutado || 0
+  )
+
+  const ahorro = Number(
+    resumen?.ahorroAcumulado || 0
+  )
+
+  const comparables = Number(
+    resumen?.preparacionesConReferencia || 0
+  )
+
+  const tarjeta = {
+    background: '#fff',
+    borderRadius: 17,
+    padding: 20,
+    marginBottom: 16,
+    border: '1px solid #e2e8f0',
+  }
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', paddingBottom: '40px' }}>
-      <header style={{ display: 'flex', alignItems: 'center', padding: '16px 20px', background: '#fff', borderBottom: '1px solid #eee' }}>
-        <button onClick={onVolver} style={{ background: 'none', border: 'none', padding: 0, marginRight: '16px', cursor: 'pointer' }}>
-          <Icon name="back" size={20} />
+    <div style={{
+      minHeight: '100vh',
+      background: '#f8fafc',
+    }}>
+      <header style={{
+        background: '#065f46',
+        padding: 20,
+        color: '#fff',
+      }}>
+        <button
+          type="button"
+          onClick={onVolver}
+          style={{
+            border: 0,
+            borderRadius: 9,
+            padding: 10,
+            cursor: 'pointer',
+          }}
+        >
+          ← Volver al perfil
         </button>
-        <h1 style={{ fontSize: '18px', margin: 0, color: '#1e293b' }}>Mi Ahorro</h1>
+
+        <h1>Mi Ahorro</h1>
       </header>
 
-      <main style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-        
-        <div style={{ background: 'linear-gradient(135deg, #059669, #047857)', borderRadius: '24px', padding: '24px', color: '#fff', boxShadow: '0 10px 25px rgba(5,150,105,0.2)', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', right: '-20px', top: '-20px', width: '150px', height: '150px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }} />
-          
-          <p style={{ margin: '0 0 8px', fontSize: '14px', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Icon name="shield" size={16} /> Ahorro total acumulado
+      <main style={{
+        maxWidth: 650,
+        padding: 20,
+        margin: '0 auto',
+      }}>
+        {!resumen && !error && (
+          <p>Cargando datos desde SQL Server...</p>
+        )}
+
+        {error && (
+          <p role="alert" style={{ color: '#b91c1c' }}>
+            {error}
           </p>
-          <h2 style={{ margin: '0 0 16px', fontSize: '48px', fontWeight: '800' }}>{soles(ahorroTotal)}</h2>
-          {ahorroTotal > 0 && (
-            <span style={{ background: 'rgba(255,255,255,0.2)', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
-              📈 Vas por buen camino
-            </span>
-          )}
+        )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '24px' }}>
-            <div style={{ background: 'rgba(0,0,0,0.15)', padding: '12px 16px', borderRadius: '16px' }}>
-              <p style={{ margin: '0 0 4px', fontSize: '11px', opacity: 0.8 }}>Presupuesto total</p>
-              <p style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>{soles(presupuesto)}</p>
-            </div>
-            <div style={{ background: 'rgba(0,0,0,0.15)', padding: '12px 16px', borderRadius: '16px' }}>
-              <p style={{ margin: '0 0 4px', fontSize: '11px', opacity: 0.8 }}>Gasto real</p>
-              <p style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>{soles(gastado)}</p>
-            </div>
-          </div>
-        </div>
+        {resumen && (
+          <>
+            <section style={{
+              ...tarjeta,
+              background: '#047857',
+              color: '#fff',
+            }}>
+              <p>Ahorro comparativo acumulado</p>
 
-        <div style={{ background: '#fff', borderRadius: '24px', padding: '24px', marginTop: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-            <div>
-              <h3 style={{ margin: '0 0 4px', fontSize: '16px', color: '#1e293b' }}>Gasto de preparaciones</h3>
-              <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>Presupuesto máximo vs gasto real</p>
-            </div>
-            <span style={{ color: porcentajeGasto >= 100 ? '#ef4444' : '#10b981', fontWeight: 'bold', fontSize: '18px' }}>{porcentajeGasto}%</span>
-          </div>
+              <h2 style={{ fontSize: 35 }}>
+                {comparables > 0
+                  ? soles(ahorro)
+                  : 'Sin datos comparativos'}
+              </h2>
 
-          <div style={{ width: '100%', height: '10px', background: '#f1f5f9', borderRadius: '99px', overflow: 'hidden' }}>
-            <div style={{ width: `${porcentajeGasto}%`, height: '100%', background: porcentajeGasto >= 100 ? '#ef4444' : '#10b981', borderRadius: '99px' }} />
-          </div>
+              <p>
+                {comparables} preparaciones con
+                costo alternativo informado.
+              </p>
+            </section>
 
-          <p style={{ margin: '12px 0 0', fontSize: '13px', color: porcentajeGasto >= 100 ? '#ef4444' : '#047857', fontWeight: '500' }}>
-            {porcentajeGasto >= 100 ? 'Has superado tu presupuesto asignado.' : `🎉 Tienes disponible ${soles(presupuesto - gastado)} para gastar`}
-          </p>
-        </div>
+            <section style={tarjeta}>
+              <h3>Resumen de gastos</h3>
 
-        <div style={{ marginTop: '24px' }}>
-          <h3 style={{ fontSize: '16px', color: '#1e293b', marginBottom: '16px' }}>Últimas comidas registradas</h3>
-          {preparaciones.length === 0 ? (
-            <p style={{ color: '#64748b', fontSize: '14px', background: '#fff', padding: '16px', borderRadius: '16px' }}>
-              No has guardado preparaciones aún.
-            </p>
-          ) : (
-            <div style={{ display: 'grid', gap: '12px' }}>
-              {preparaciones.map((item, idx) => (
-                <div key={idx} style={{ background: '#fff', borderRadius: '16px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div style={{ width: '48px', height: '48px', background: '#f1f5f9', borderRadius: '12px', display: 'grid', placeItems: 'center', marginRight: '16px' }}>
-                      <Icon name="chef" size={24} fill="#94a3b8" />
-                    </div>
-                    <div>
-                      <h4 style={{ margin: '0 0 4px', fontSize: '15px', color: '#1e293b' }}>{item.receta || item.plato}</h4>
-                      <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>{item.fecha ? new Date(item.fecha).toLocaleDateString('es-PE') : 'Hoy'}</p>
-                    </div>
+              <p>
+                Presupuesto acumulado:
+                {' '}<strong>{soles(presupuesto)}</strong>
+              </p>
+
+              <p>
+                Gasto confirmado:
+                {' '}<strong>{soles(gasto)}</strong>
+              </p>
+
+              <p>
+                Saldo frente al presupuesto:
+                {' '}<strong>{soles(presupuesto - gasto)}</strong>
+              </p>
+            </section>
+
+            <section style={tarjeta}>
+              <h3>Ahorro acumulado por mes</h3>
+
+              {meses.length === 0 && (
+                <p>
+                  Registra una compra con costo alternativo
+                  para empezar a calcular el ahorro.
+                </p>
+              )}
+
+              {meses.map(mes => (
+                <div key={mes.mes} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  borderBottom: '1px solid #e2e8f0',
+                  padding: '12px 0',
+                  gap: 12,
+                }}>
+                  <div>
+                    <strong>{mes.mes}</strong>
+
+                    <small style={{
+                      display: 'block',
+                      color: '#64748b',
+                    }}>
+                      {mes.preparaciones} preparaciones
+                    </small>
                   </div>
-                  <div style={{ background: '#f1f5f9', color: '#475569', padding: '6px 12px', borderRadius: '99px', fontSize: '13px', fontWeight: 'bold' }}>
-                    Gasto: {soles(Number(item.gastoReal ?? item.ahorro ?? 0))}
-                  </div>
+
+                  <strong style={{
+                    color: mes.ahorro >= 0
+                      ? '#047857'
+                      : '#b91c1c',
+                  }}>
+                    {soles(mes.ahorro)}
+                  </strong>
                 </div>
               ))}
-            </div>
-          )}
-        </div>
+            </section>
 
+            <section style={tarjeta}>
+              <h3>Ahorro por preparación</h3>
+
+              {preparaciones.length === 0 && (
+                <p>
+                  Aún no tienes preparaciones registradas.
+                </p>
+              )}
+
+              {preparaciones.map(p => (
+                <article key={p.id} style={{
+                  padding: '14px 0',
+                  borderBottom: '1px solid #e2e8f0',
+                }}>
+                  <strong>{p.receta}</strong>
+
+                  <p style={{
+                    color: '#64748b',
+                    fontSize: 13,
+                  }}>
+                    {new Date(p.fecha)
+                      .toLocaleDateString('es-PE')}
+                  </p>
+
+                  <p>
+                    Gasto real: {soles(p.gastoReal)}
+                  </p>
+
+                  <p>
+                    Costo alternativo:
+                    {' '}
+                    {p.costoReferenciaAlternativa == null
+                      ? 'Sin registrar'
+                      : soles(p.costoReferenciaAlternativa)}
+                  </p>
+
+                  <strong style={{
+                    color: p.ahorroComparado >= 0
+                      ? '#047857'
+                      : '#b91c1c',
+                  }}>
+                    {p.ahorroComparado == null
+                      ? 'Ahorro no calculado'
+                      : `Ahorro comparativo: ${soles(
+                          p.ahorroComparado
+                        )}`}
+                  </strong>
+                </article>
+              ))}
+            </section>
+
+            <p style={{
+              fontSize: 12,
+              color: '#64748b',
+            }}>
+              El ahorro se calcula usando el costo
+              alternativo ingresado por el usuario.
+              No representa una comparación
+              verificada automáticamente por PlatoMatch.
+            </p>
+
+            <button
+              type="button"
+              onClick={onCompras}
+              style={{
+                padding: 13,
+                background: '#059669',
+                border: 0,
+                color: '#fff',
+                borderRadius: 10,
+                cursor: 'pointer',
+              }}
+            >
+              Volver a compras
+            </button>
+          </>
+        )}
       </main>
     </div>
   )
