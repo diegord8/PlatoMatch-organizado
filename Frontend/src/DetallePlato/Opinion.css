@@ -1,0 +1,330 @@
+/* ---------- Pantalla de opiniones ---------- */
+
+.opinion__barra {
+    background: var(--green-900);
+}
+
+.opinion__volver {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 32px;
+    border: 0;
+    background: none;
+    color: var(--mint);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.opinion__volver:hover {
+    color: #fff;
+}
+
+.opinion__main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+    box-sizing: border-box;
+}
+
+.opinion form {
+    display: grid;
+    gap: 18px;
+}
+
+.opinion__tarjeta {
+    padding: 20px;
+    border: 1px solid #e3eee7;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(20, 60, 40, 0.07);
+    box-sizing: border-box;
+}
+
+/* ---------- Plato calificado ---------- */
+
+.opinion__plato {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+}
+
+.opinion__miniatura {
+    flex: none;
+    width: 80px;
+    height: 80px;
+    overflow: hidden;
+    border-radius: 17px;
+}
+
+.opinion__foto {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.opinion__foto--vacia {
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #cfe9da, #e9f5ee);
+    font-size: 34px;
+}
+
+.opinion__etiqueta {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.opinion__plato h1 {
+    margin-top: 2px;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.opinion__precio {
+    margin-top: 4px;
+    color: var(--green-500);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* ---------- Estrellas ---------- */
+
+.opinion__pregunta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.opinion__pregunta span {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff1b8;
+    color: #f59e0b;
+}
+
+.opinion__estrellas {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 18px;
+}
+
+.estrella {
+    display: grid;
+    place-items: center;
+    padding: 4px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    color: #e5e7eb;
+    transition: color 0.12s, transform 0.12s;
+}
+
+.estrella:hover {
+    transform: scale(1.08);
+}
+
+.estrella--activa {
+    color: #fbbf24;
+}
+
+.opinion__ayuda {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* ---------- Destacados ---------- */
+
+.opinion__titulo-campo {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.opinion__titulo-campo span {
+    font-weight: 400;
+    color: var(--muted);
+}
+
+.opinion__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 13px;
+}
+
+.chip {
+    padding: 8px 14px;
+    border: 1px solid #dce8e1;
+    border-radius: 999px;
+    background: #f3f7f5;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.chip:hover {
+    border-color: var(--green-500);
+}
+
+.chip--activo {
+    border-color: var(--green-500);
+    background: var(--green-500);
+    color: #fff;
+}
+
+/* ---------- Comentario ---------- */
+
+.opinion__texto {
+    display: block;
+    width: 100%;
+    height: 120px;
+    margin-top: 12px;
+    padding: 14px 16px;
+    resize: vertical;
+    border: 2px solid #dce8e1;
+    border-radius: 17px;
+    background: #f3f7f5;
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    box-sizing: border-box;
+}
+
+.opinion__texto::placeholder {
+    color: #94a39b;
+}
+
+.opinion__texto:focus {
+    outline: none;
+    border-color: var(--green-500);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(45, 190, 108, 0.15);
+}
+
+.opinion__contador {
+    margin-top: 7px;
+    text-align: right;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* ---------- Enviar ---------- */
+
+.opinion__enviar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 56px;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #2dbe6c, #25b062);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(45, 190, 108, 0.22);
+    box-sizing: border-box;
+}
+
+.opinion__enviar:disabled {
+    background: #f1f2f4;
+    color: #a0a7b0;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.opinion__nota {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* ---------- Confirmación ---------- */
+
+.opinion__gracias {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 36px 22px;
+    text-align: center;
+}
+
+.opinion__gracias h1 {
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.opinion__gracias p {
+    max-width: 440px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--muted);
+}
+
+.opinion__gracias .opinion__enviar {
+    max-width: 300px;
+    margin-top: 10px;
+}
+
+.opinion__check {
+    display: grid;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: var(--green-500);
+    color: #fff;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 600px) {
+    .opinion__volver {
+        padding: 14px 18px;
+    }
+
+    .opinion__main {
+        padding: 18px 14px 32px;
+    }
+
+    .opinion__tarjeta {
+        padding: 15px;
+        border-radius: 18px;
+    }
+
+    .opinion__plato {
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .opinion__miniatura {
+        width: 68px;
+        height: 68px;
+    }
+
+    .opinion__plato h1 {
+        font-size: 16px;
+    }
+
+    .estrella svg {
+        width: 32px;
+        height: 32px;
+    }
+}
