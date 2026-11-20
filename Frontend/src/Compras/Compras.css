@@ -1,0 +1,24 @@
+.modulo-nuevo {min-height:100vh;background:#f2f7f4;color:#1d372a;font-family:inherit}
+.modulo-nuevo__header {background:linear-gradient(110deg,#18563e,#249562);color:white;padding:27px max(24px,calc((100% - 1100px)/2));display:flex;flex-wrap:wrap;align-items:center;gap:24px}
+.modulo-nuevo__header button{background:transparent;border:1px solid #ffffff88;color:white;border-radius:12px;padding:10px 17px;cursor:pointer}
+.modulo-nuevo__header h1 {font-size:clamp(22px,3vw,31px);margin:0}
+.modulo-nuevo__contenido {max-width:1100px;margin:32px auto;padding:0 20px;display:grid;gap:22px}
+.modulo-nuevo__panel{background:#fff;border:1px solid #dbe9e1;border-radius:22px;padding:clamp(19px,3vw,33px);box-shadow:0 4px 14px #284e3210}
+.modulo-nuevo__panel h2{font-size:22px;margin:6px 0 15px}.modulo-nuevo__panel h3{margin-top:22px;font-size:17px}
+.modulo-nuevo__panel p{line-height:1.55;color:#52685c}
+.modulo-nuevo__eyebrow{font-weight:700;color:#218f5a!important;font-size:12px;text-transform:uppercase;letter-spacing:.07em}
+.modulo-nuevo__acciones{display:flex;flex-wrap:wrap;gap:12px;margin:22px 0}
+.modulo-nuevo__panel button{background:#24b572;color:#fff;border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer;margin-right:10px;margin-top:9px}
+.modulo-nuevo__panel button.secundario{background:#e7f5eb;color:#206444}.modulo-nuevo__panel button:disabled{opacity:.5;cursor:not-allowed}
+.modulo-nuevo__nota{background:#f4f8f5;padding:14px 16px;border-radius:12px;font-size:13px}
+.modulo-nuevo__lista{list-style:none;padding:0;margin:12px 0 22px}
+.modulo-nuevo__lista li{padding:14px;border-bottom:1px solid #e9efe9}
+.modulo-nuevo__lista label{display:flex;gap:12px;align-items:center;cursor:pointer}
+.modulo-nuevo__lista small{margin-left:auto;color:#6c8374}
+.modulo-nuevo__completado span{text-decoration:line-through;color:#869c8e}
+.modulo-nuevo__progreso{display:flex;gap:12px;align-items:center}.modulo-nuevo__panel progress{width:100%;height:15px;accent-color:#28a46b;margin:14px 0}
+.modulo-nuevo__resumen{display:flex;gap:18px;flex-wrap:wrap;background:#edfaf1;border-radius:14px;padding:18px;margin:18px 0}
+.modulo-nuevo__form{display:flex;gap:18px;flex-wrap:wrap;align-items:center}.modulo-nuevo__form label{display:flex;align-items:center;gap:10px}
+.modulo-nuevo__form input[type=time]{padding:10px;border:1px solid #b8d7c7;border-radius:10px}
+.modulo-nuevo__tabla{overflow-x:auto}.modulo-nuevo__tabla table{border-collapse:collapse;width:100%;min-width:520px}
+.modulo-nuevo__tabla td,.modulo-nuevo__tabla th{padding:14px;text-align:left;border-bottom:1px solid #dfece4}
