@@ -1,40 +1,7 @@
-import { normalizar } from '../salud/filtros.js'
 
-export function generarListaCompras(plato, personas, disponibles = '') {
-  const existentes = disponibles.split(',').map((i) => normalizar(i)).filter(Boolean)
-  const factor = personas / (plato.porciones || 1)
-  return {
-    id: crypto.randomUUID(),
-    platoId: plato.id,
-    nombre: plato.nombre,
-    personas,
-    fecha: new Date().toISOString(),
-    ingredientes: plato.ingredientes.map((ingrediente, indice) => {
-      const nombre = ingrediente.nombre
-      const encontrado = existentes.some((item) => {
-        const a = normalizar(nombre)
-        return a === item || a.startsWith(`${item} `) || item.startsWith(`${a} `)
-      })
-      return {
-        id: `${indice}-${normalizar(nombre)}`,
-        nombre,
-        cantidad: escalarCantidad(ingrediente.cantidad, factor),
-        enCasa: encontrado,
-        comprado: false,
-      }
-    }),
-  }
-}
-
-export function escalarCantidad(cantidad = '', factor = 1) {
-  const fracciones = { '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 1 / 3, '⅔': 2 / 3 }
-  const m = /^(\d+(?:[.,]\d+)?|[½¼¾⅓⅔])\s*(.*)$/.exec(cantidad.trim())
-  if (!m) return cantidad
-  const n = (fracciones[m[1]] ?? Number(m[1].replace(',', '.'))) * factor
-  const valor = Number.isInteger(n) ? String(n) : n.toLocaleString('es-PE', { maximumFractionDigits: 2 })
-  return `${valor} ${m[2]}`.trim()
-}
-
+/**
+ * HU-17: Generar el texto de la lista de compras.
+ */
 export function textoLista(lista) {
   if (!lista) {
     return 'No hay una lista de compras disponible.'
